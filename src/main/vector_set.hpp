@@ -205,11 +205,25 @@ sib::vector_set<T,A>::crend() const
 
     // capacity
 template <typename T, typename A>
-    bool empty() const;
+inline bool 
+sib::vector_set<T,A>::empty() const
+{
+  return _vec.empty();
+}
+
 template <typename T, typename A>
-    size_type max_size() const;
+inline sib::vector_set<T,A>::size_type 
+sib::vector_set<T,A>::max_size() const
+{
+  return _vec.max_size();
+}
+
 template <typename T, typename A>
-    size_type size() const;
+inline sib::vector_set<T,A>::size_type 
+sib::vector_set<T,A>::size() const
+{
+  return _vec.size();
+}
 
     // modifiers
 template <typename T, typename A>
