@@ -41,6 +41,37 @@ namespace ztd {
       Node* _end;
     };
 
+    template <typename K, typename T>
+    class map_node {
+    public:
+      typedef K key_type;
+      typedef T mapped_type;
+      typedef std::pair<K const, T> value_type;
+
+      key_type const& key() const;
+      mapped_type& mapped();
+      mapped_type const& mapped() const;
+      value_type& value()&
+      value_type const& value() const;
+    protected:
+      value_type _value;
+    };
+
+    template <typename T>
+    class set_node {
+    public:
+      typedef T key_type;
+      typedef T value_type;
+
+      key_type const& key() const;
+      value_type const& value() const;
+    protected:
+      V _value;
+    };
+
+    template <typename N>
+    static N* find(N* node);
+
     template <typename N>
     static N* maximum(N* node);
 
@@ -152,6 +183,71 @@ inline bool
 ztd::tree::iterator<N,T>::operator!=(ztd::tree::iterator<N,T> const& iter) const
 {
   return _node != iter._node;
+}
+
+template <typename K, typename T>
+inline sib::tree::map_node<K,T>::key_type const&
+sib::tree::map_node<K,T>::key() const
+{
+  return _value.first();
+}
+
+template <typename K, typename T>
+inline sib::tree::map_node<K,T>::mapped_type&
+sib::tree::map_node<K,T>::mapped()
+{
+  return _value.second();
+}
+
+template <typename K, typename T>
+inline sib::tree::map_node<K,T>::mapped_type const&
+sib::tree::map_node<K,T>::mapped() const
+{
+  return _value.second();
+}
+
+template <typename K, typename T>
+inline sib::tree::map_node<K,T>::value_type&
+sib::tree::map_node<K,T>::value()
+{
+  return _value;
+}
+
+template <typename K, typename T>
+inline sib::tree::map_node<K,T>::value_type const&
+sib::tree::map_node<K,T>::value() const
+{
+  return _value;
+}
+
+template <typename T>
+inline sib::tree::set_node<T>::key_type const&
+sib::tree::set_node<T>::key() const
+{
+  return _value;
+}
+
+template <typename T>
+inline sib::tree::set_node<T>::value_type const&
+sib::tree::set_node<T>::value() const
+{
+  return _value;
+}
+
+template <typename N, typename Compare, typename K>
+inline N*
+sib::tree::find(N* const node, K const& key)
+{
+  while(node) {
+    if (Compare(key, node->key())) {
+      node = node->left;
+    } else if (Compare(node->key(), key)) {
+      node = node->right;
+    } else {
+      break;
+    }
+  }
+  return node;
 }
 
 template <typename N>

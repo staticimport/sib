@@ -22,9 +22,10 @@ namespace ztd {
   class unbalanced_set {
   private:
     typedef ns_unbalanced_set::traits<T> traits;
+    typedef tree::node<T> node;
   public:
     typedef Allocator allocator_type;
-    typedef typename traits::const_iterator const_iterator;
+    typedef typename tree::const_iterator< const_iterator;
     typedef typename Allocator::const_pointer const_pointer;
     typedef typename Allocator::const_reference const_reference;
     typedef typename Allocator::difference_type difference_type;
