@@ -59,9 +59,9 @@ namespace sib {
     std::pair<iterator,bool> insert(value_type&& value);
     template <typename InputIterator>
     void insert(InputIterator begin, InputIterator end);
-    void insert(std::initializer_list<value_type> ilist);
-    template <class Args...>
-    std::pair<iterator,bool> emplace(Args&&... args);
+    //void insert(std::initializer_list<value_type> ilist);
+    //template <class Args...>
+    //std::pair<iterator,bool> emplace(Args&&... args);
     iterator erase(const_iterator position);
     iterator erase(const_iterator first, const_iterator last);
     size_type erase(key_type const& key);
@@ -227,37 +227,120 @@ sib::vector_set<T,A>::size() const
 
     // modifiers
 template <typename T, typename A>
-    void clear();
+inline void 
+sib::vector_set<T,A>::clear()
+{
+  _vec.clear();
+}
+
 template <typename T, typename A>
-    std::pair<iterator,bool> insert(value_type const& value);
+inline std::pair<sib::vector_set<T,A>::iterator,bool> 
+sib::vector_set<T,A>::insert(value_type const& value)
+{
+  auto iter = find(value);
+  if (iter != end()) {
+    return _vec.push_back(value);
+  } else {
+    return std::pair(iter,true);
+  }
+}
+
 template <typename T, typename A>
-    std::pair<iterator,bool> insert(value_type&& value);
+inline std::pair<sib::vector_set<T,A>::iterator,bool> 
+sib::vector_set<T,A>::insert(value_type&& value)
+{
+  auto iter = find(value);
+  if (iter != end()) {
+    return _vec.insert(value);
+  } else {
+    return std::pair(iter,true);
+  }
+}
+
 template <typename T, typename A>
-    template <typename InputIterator>
-    void insert(InputIterator begin, InputIterator end);
+template <typename InputIterator>
+inline void 
+sib::vector_set<T,A>::insert(InputIterator begin, InputIterator end)
+{
+  for(auto iter = begin; iter != end; ++iter) {
+    insert(*iter);
+  }
+}
+
+//template <typename T, typename A>
+//void insert(std::initializer_list<value_type> ilist);
+
+//template <typename T, typename A>
+//template <class Args...>
+//std::pair<iterator,bool> emplace(Args&&... args);
+
 template <typename T, typename A>
-    void insert(std::initializer_list<value_type> ilist);
+inline sib::vector_set<T,A>::iterator 
+sib::vector_set<T,A>::erase(
+  sib::vector_set<T,A>::const_iterator position)
+{
+  return _vec.erase(position);
+}
+
 template <typename T, typename A>
-    template <class Args...>
-    std::pair<iterator,bool> emplace(Args&&... args);
+inline sib::vector_set<T,A>::iterator 
+sib::vector_set<T,A>::erase(
+  sib::vector_set<T,A>::const_iterator first, 
+  sib::vector_set<T,A>::const_iterator last)
+{
+  return _vec.erase(first,last);
+}
+
 template <typename T, typename A>
-    iterator erase(const_iterator position);
+inline sib::vector_set<T,A>::size_type 
+sib::vector_set<T,A>::erase(
+  sib::vector_set<T,A>::key_type const& key)
+{
+  auto iter = find(key);
+  return iter != end() ? _vec.erase(iter) : 0;
+}
+
 template <typename T, typename A>
-    iterator erase(const_iterator first, const_iterator last);
-template <typename T, typename A>
-    size_type erase(key_type const& key);
-template <typename T, typename A>
-    void swap(vector_set& other);
+inline void 
+sib::vector_set<T,A>::swap(sib::vector_set<T,A>::vector_set& other)
+{
+  _vec.swap(other._vec);
+}
 
     // lookup
 template <typename T, typename A>
-    size_type count(key_type const& key) const;
+inline sib::vector_set<T,A>::size_type 
+sib::vector_set<T,A>::count(
+  sib::vector_set<T,A>::key_type const& key) const
+{
+  return find(key) == end() ? 0 : 1;
+}
+
 template <typename T, typename A>
-    iterator find(key_type const& key);
+sib::vector_set<T,A>::iterator 
+sib::vector_set<T,A>::find(
+  sib::vector_set<T,A>::key_type const& key)
+{
+  for(iterator iter = begin(); iter != end(); ++iter) {
+    if (*iter == key) {
+      return iter;
+    }
+  }
+  return end();
+}
+
 template <typename T, typename A>
-    const_iterator find(key_type const& key) const;
-  private:
-    vector _vec;
+sib::vector_set<T,A>::const_iterator 
+sib::vector_set<T,A>::find(
+  sib::vector_set<T,A>::key_type const& key) const
+{
+  for(iterator iter = begin(); iter != end(); ++iter) {
+    if (*iter == key) {
+      return iter;
+    }
+  }
+  return end();
+}
 
 #endif /* SIB_VECTOR_SET_HPP */
 
