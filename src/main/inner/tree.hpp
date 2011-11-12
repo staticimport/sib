@@ -1,7 +1,7 @@
-#ifndef ZTD_TREE_HPP
-#define ZTD_TREE_HPP
+#ifndef SIB_TREE_HPP
+#define SIB_TREE_HPP
 
-namespace ztd {
+namespace sib {
   namespace tree {
     template <typename N, typename T>
     class iterator {
@@ -93,34 +93,34 @@ namespace ztd {
  * Template Implemenation
  **/
 template <typename N, typename T>
-inline ztd::tree::iterator<N,T>::iterator()
+inline sib::tree::iterator<N,T>::iterator()
 : _node(0)
 {
 }
 
 template <typename N, typename T>
-inline ztd::tree::iterator<N,T>::iterator(N* const node)
+inline sib::tree::iterator<N,T>::iterator(N* const node)
 : _node(node)
 {
 }
 
 template <typename N, typename T>
-inline ztd::tree::iterator<N,T>::reference
-ztd::tree::iterator<N,T>::operator*() const
+inline sib::tree::iterator<N,T>::reference
+sib::tree::iterator<N,T>::operator*() const
 {
   return _node->value;
 }
 
 template <typename N, typename T>
-inline ztd::tree::iterator<N,T>::pointer
-ztd::tree::iterator<N,T>::operator->() const
+inline sib::tree::iterator<N,T>::pointer
+sib::tree::iterator<N,T>::operator->() const
 {
   return &(_node->value);
 }
 
 template <typename N, typename T>
-ztd::tree::iterator<N,T>&
-ztd::tree::iterator<N,T>::operator++() const
+sib::tree::iterator<N,T>&
+sib::tree::iterator<N,T>::operator++() const
 {
   if (_node->right) {
     _node = minimum(_node->right);
@@ -138,8 +138,8 @@ ztd::tree::iterator<N,T>::operator++() const
 }
 
 template <typename N, typename T>
-inline ztd::tree::iterator<N,T>&
-ztd::tree::iterator<N,T>::operator++(int)
+inline sib::tree::iterator<N,T>&
+sib::tree::iterator<N,T>::operator++(int)
 {
   N* const old(_node);
   operator++();
@@ -147,8 +147,8 @@ ztd::tree::iterator<N,T>::operator++(int)
 }
 
 template <typename N, typename T>
-ztd::tree::iterator<N,T>&
-ztd::tree::iterator<N,T>::operator--()
+sib::tree::iterator<N,T>&
+sib::tree::iterator<N,T>::operator--()
 {
   if (_node->left) {
     _node = maximum(_node->left);
@@ -166,8 +166,8 @@ ztd::tree::iterator<N,T>::operator--()
 }
 
 template <typename N, typename T>
-inline ztd::tree::iterator<N,T>&
-ztd::tree::iterator<N,T>::operator--(int)
+inline sib::tree::iterator<N,T>&
+sib::tree::iterator<N,T>::operator--(int)
 {
   N* const old(_node);
   operator--();
@@ -176,14 +176,14 @@ ztd::tree::iterator<N,T>::operator--(int)
 
 template <typename N, typename T>
 inline bool
-ztd::tree::iterator<N,T>::operator==(ztd::tree::iterator<N,T> const& iter) const
+sib::tree::iterator<N,T>::operator==(sib::tree::iterator<N,T> const& iter) const
 {
   return _node == iter._node;
 }
 
 template <typename N, typename T>
 inline bool
-ztd::tree::iterator<N,T>::operator!=(ztd::tree::iterator<N,T> const& iter) const
+sib::tree::iterator<N,T>::operator!=(sib::tree::iterator<N,T> const& iter) const
 {
   return _node != iter._node;
 }
@@ -265,7 +265,7 @@ static std::size_t height(N* node)
 
 template <typename N>
 inline N*
-ztd::tree::maximum<N>(N* node)
+sib::tree::maximum<N>(N* node)
 {
   while (node->right) node = node->right;
   return node;
@@ -273,7 +273,7 @@ ztd::tree::maximum<N>(N* node)
 
 template <typename N>
 inline N*
-ztd::tree::minimum<N>(N* node)
+sib::tree::minimum<N>(N* node)
 {
   while (node->left) node = node->left;
   return node;
@@ -281,7 +281,7 @@ ztd::tree::minimum<N>(N* node)
 
 template <typename N>
 N*
-ztd::tree::rotate_left(N* node)
+sib::tree::rotate_left(N* node)
 {
   // Update child pointers
   N* top = node->right;
@@ -303,7 +303,7 @@ ztd::tree::rotate_left(N* node)
 
 template <typename N>
 N*
-ztd::tree::rotate_right(N* node)
+sib::tree::rotate_right(N* node)
 {
   // Update child pointers
   N* top = node->left;
@@ -323,5 +323,5 @@ ztd::tree::rotate_right(N* node)
   return top;
 }
 
-#endif /* ZTD_TREE_HPP */
+#endif /* SIB_TREE_HPP */
 
