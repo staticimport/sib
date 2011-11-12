@@ -73,6 +73,9 @@ namespace ztd {
     static N* find(N* node);
 
     template <typename N>
+    static std::size_t height(N* node);
+
+    template <typename N>
     static N* maximum(N* node);
 
     template <typename N>
@@ -248,6 +251,16 @@ sib::tree::find(N* const node, K const& key)
     }
   }
   return node;
+}
+    
+template <typename N>
+static std::size_t height(N* node)
+{
+  if (node) {
+    return 1 + std::max(height(node->left, node->right));
+  } else {
+    return 0;
+  }
 }
 
 template <typename N>
