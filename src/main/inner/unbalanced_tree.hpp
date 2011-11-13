@@ -1,7 +1,7 @@
-#ifndef ZTL_UNBALANCED_SET_HPP
-#define ZTL_UNBALANCED_SET_HPP
+#ifndef SIB_UNBALANCED_SET_HPP
+#define SIB_UNBALANCED_SET_HPP
 
-namespace ztd {
+namespace sib {
   namespace ns_unbalanced_set {
     template <typename T>
     struct traits {
@@ -16,14 +16,17 @@ namespace ztd {
     };
   };
 
-  template <typename T,
-            typename Compare=std::less<T>,
-            typename Allocator = std::allocator<T> >
-  class unbalanced_set {
+  template <typename K,
+            typename T,
+            typename Compare=std::less<K>,
+            typename Allocator = 
+              std::allocator<std::pair<K,T> > >
+  class unbalanced_tree {
   private:
     typedef ns_unbalanced_set::traits<T> traits;
     typedef tree::node<T> node;
   public:
+    // Base types
     typedef Allocator allocator_type;
     typedef typename tree::const_iterator< const_iterator;
     typedef typename Allocator::const_pointer const_pointer;
@@ -34,6 +37,10 @@ namespace ztd {
     typedef typename Allocator::reference reference;
     typedef typename Allocator::size_type size_type;
     typedef typename Allocator::value_type value_type;
+
+    // Iterator types
+    typedef typename tree::iterator<node const, value_type const> const_iterator;
+    typedef typename tree::iterator<node,value_type> iterator;
 
     // Init/Uninit
     explicit unbalanced_set(Compare const& compare = Compare(),
@@ -52,5 +59,5 @@ namespace ztd {
   };
 }
 
-#endif /* ZTL_UNBALANCED_SET_HPP */
+#endif /* SIB_UNBALANCED_SET_HPP */
 
