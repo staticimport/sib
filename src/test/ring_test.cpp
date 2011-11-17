@@ -34,3 +34,27 @@ BOOST_AUTO_TEST_CASE(ring_push_until_full)
   BOOST_CHECK(ring.size() == ring.capacity());
 }
 
+BOOST_AUTO_TEST_CASE(ring_pop_one)
+{
+  sib::ring<int> ring(16);
+  ring.push(423);
+  ring.pop();
+  BOOST_CHECK(ring.empty() == true);
+  BOOST_CHECK(ring.full() == false);
+  BOOST_CHECK(ring.size() == 0);
+}
+
+BOOST_AUTO_TEST_CASE(ring_pop_all)
+{
+  sib::ring<int> ring(16);
+  for(auto ii = ring.capacity(); ii; --ii) {
+    ring.push(static_cast<int>(ii));
+  }
+  for(auto ii = ring.capacity(); ii; --ii) {
+    ring.pop();
+  }
+  BOOST_CHECK(ring.empty() == true);
+  BOOST_CHECK(ring.full() == false);
+  BOOST_CHECK(ring.size() == 0);
+}
+
