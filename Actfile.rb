@@ -36,7 +36,8 @@ def test
   TESTS.collect do |test|
     run_task = Act::Task.new do
       puts "---> testing #{test}"
-      puts %x{test/#{test}_test --log-level=all 2>&1}
+      puts %x{#{"test/#{test}_test --report_level=detailed " +
+                "--show_progress=true --build_info=true 2>&1"}}
     end
     run_task.depends.merge exe_tasks
   end
