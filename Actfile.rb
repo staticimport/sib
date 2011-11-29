@@ -20,7 +20,7 @@ def act
            lambda {|f| "install/include/#{File.basename(f)}"})
 end
 
-TESTS = ['ring']
+TESTS = ['dynamic_ring','ring']
 def test
   act()
   system('mkdir -p test')

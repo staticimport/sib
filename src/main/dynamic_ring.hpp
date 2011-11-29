@@ -1,9 +1,9 @@
-#ifndef ZTD_DYNAMIC_RING_HPP
-#define ZTD_DYNAMIC_RING_HPP
+#ifndef SIB_DYNAMIC_RING_HPP
+#define SIB_DYNAMIC_RING_HPP
 
 #include "ring.hpp"
 
-namespace ztd {
+namespace sib {
   namespace ns_dynamic_ring {
     template <typename T, bool ConcurrentPushPop, typename Allocator>
     struct traits {
@@ -51,8 +51,11 @@ namespace ztd {
     void push(T const& x);
     reference start_push();
   private:
-    typename Allocator::rebind<traits::sub_ring>::other _ring_allocator;
-    typename ring<traits::sub_ring_pointer,ConcurrentPushPop,Allocator> expand_ring;
+    void advance_read_ring();
+    void advance_write_ring();
+
+    typename Allocator::template rebind<traits::sub_ring>::other _ring_allocator;
+    ring<typename traits::sub_ring_pointer,ConcurrentPushPop,Allocator> _expand_ring;
     typename traits::sub_ring_pointer _read_ring;
     typename traits::sub_ring_pointer _write_ring;
   };
@@ -62,18 +65,18 @@ namespace ztd {
  * Template Implemenation
  **/
 template <typename T, bool C, typename A>
-ztd::dynamic_ring<T,C,A>::dynamic_ring(
-    size_type const min_capacity,
-    A const& allocator = A())
+sib::dynamic_ring<T,C,A>::dynamic_ring(
+    sib::dynamic_ring<T,C,A>::size_type const min_capacity,
+    A const& allocator)
 : _ring_allocator(allocator),
   _expand_ring(sizeof(void*) * 8),
-  _read_ring(new(_ring_allocator.allocate(1)) traits::sub_ring(min_capacity)), // TODO: pass allocator? ring_allocator?
+  _read_ring(new(_ring_allocator.allocate(1)) typename traits::sub_ring(min_capacity)), // TODO: pass allocator? ring_allocator?
   _write_ring(_read_ring)
 {
 }
 
 template <typename T, bool C, typename A>
-ztd::dynamic_ring<T,C,A>::~dynamic_ring()
+sib::dynamic_ring<T,C,A>::~dynamic_ring()
 {
   while (!empty()) {
     pop();
@@ -83,22 +86,22 @@ ztd::dynamic_ring<T,C,A>::~dynamic_ring()
 
 template <typename T, bool C, typename A>
 inline bool
-ztd::dynamic_ring<T,C,A>::empty() const
+sib::dynamic_ring<T,C,A>::empty() const
 {
   return _write_ring->empty();
 }
 
 template <typename T, bool C, typename A>
-inline ztd::dynamic_ring<T,C,A>::const_reference
-ztd::dynamic_ring<T,C,A>::front() const
+inline typename sib::dynamic_ring<T,C,A>::const_reference
+sib::dynamic_ring<T,C,A>::front() const
 {
   if (_read_ring->empty()) advance_read_ring();
   return _read_ring.front();
 }
 
 template <typename T, bool C, typename A>
-ztd::dynamic_ring<T,C,A>::size_type
-ztd::dynamic_ring<T,C,A>::size() const
+typename sib::dynamic_ring<T,C,A>::size_type
+sib::dynamic_ring<T,C,A>::size() const
 {
   size_type total(_read_ring->size());
   auto expand_ring_end(_expand_ring.cend());
@@ -110,7 +113,7 @@ ztd::dynamic_ring<T,C,A>::size() const
 
 template <typename T, bool C, typename A>
 inline void
-ztd::ring<T,C,A>::finish_push()
+sib::ring<T,C,A>::finish_push()
 {
   _write_ring->finish_push();
   if (_write_ring->size() == 1 and _read_ring != _write_ring) {
@@ -119,8 +122,8 @@ ztd::ring<T,C,A>::finish_push()
 }
 
 template <typename T, bool C, typename A>
-inline ztd::ring<T,C,A>::reference
-ztd::dynamic_ring<T,C,A>::front()
+inline typename sib::ring<T,C,A>::reference
+sib::dynamic_ring<T,C,A>::front()
 {
   if (_read_ring->empty()) advance_read_ring();
   return _read_ring.front();
@@ -128,14 +131,14 @@ ztd::dynamic_ring<T,C,A>::front()
 
 template <typename T, bool C, typename A>
 inline void
-ztd::dynamic_ring<T,C,A>::pop()
+sib::dynamic_ring<T,C,A>::pop()
 {
   _read_ring->pop();
 }
 
 template <typename T, bool C, typename A>
 inline void
-ztd::dynamic_ring<T,C,A>::push(T const& x)
+sib::dynamic_ring<T,C,A>::push(T const& x)
 {
   if (_write_ring->full()) advance_write_ring();
   _write_ring->push(x);
@@ -145,12 +148,29 @@ ztd::dynamic_ring<T,C,A>::push(T const& x)
 }
 
 template <typename T, bool C, typename A>
-inline ztd::dynamic_ring<T,C,A>::reference
-ztd::dynamic_ring<T,C,A>::start_push()
+inline typename sib::dynamic_ring<T,C,A>::reference
+sib::dynamic_ring<T,C,A>::start_push()
 {
   if (_write_ring->full()) advance_write_ring();
   return _write_ring->start_push();
 }
-                                      
 
-#endif /* ZTD_DYNAMIC_RING_HPP */
+template <typename T, bool C, typename A>
+void
+sib;:dynamic_ring<T,C,A>::advance_read_ring()
+{
+  _read_ring->~ring();
+  _ring_allocator.deallocate(_read_ring, 1);
+  _read_ring = _expand_ring.peek();
+  _expand_ring.pop();
+}
+
+template <typename T, bool C, typename A>
+void
+sib::dynamic_ring<T,C,A>::advance_write_ring()
+{
+  size_type const next_capacity = _write_ring->capacity() * 2;
+  _write_ring = new
+}
+
+#endif /* SIB_DYNAMIC_RING_HPP */
