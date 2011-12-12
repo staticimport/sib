@@ -1,9 +1,9 @@
-#ifndef ZTD_AVL_TREE_HPP
-#define ZTD_AVL_TREE_HPP
+#ifndef SIB_AVL_TREE_HPP
+#define SIB_AVL_TREE_HPP
 
-#include "tree.hpp"
+#include "private/tree.hpp"
 
-namespace ztd {
+namespace sib {
   namespace tree {
     template <typename T>
     struct avl_node {
@@ -31,5 +31,5 @@ namespace ztd {
   };
 }
 
-#endif /* ZTD_AVL_TREE_HPP */
+#endif /* SIB_AVL_TREE_HPP */
 

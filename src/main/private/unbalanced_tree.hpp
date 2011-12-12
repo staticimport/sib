@@ -1,8 +1,10 @@
 #ifndef SIB_UNBALANCED_SET_HPP
 #define SIB_UNBALANCED_SET_HPP
 
+#include "private/tree.hpp"
+
 namespace sib {
-  namespace ns_unbalanced_set {
+  namespace ns_unbalanced_tree {
     template <typename T>
     struct traits {
 
@@ -18,33 +20,29 @@ namespace sib {
 
   template <typename K,
             typename T,
+            typename Node,
             typename Compare=std::less<K>,
-            typename Allocator = 
-              std::allocator<std::pair<K,T> > >
-  class unbalanced_tree {
+            typename Allocator = std::allocator<T> >
+  class unbalanced_tree : 
+  private tree<K,T,Node,Compare,Allocator> {
   private:
     typedef ns_unbalanced_set::traits<T> traits;
-    typedef tree::node<T> node;
   public:
     // Base types
     typedef Allocator allocator_type;
-    typedef typename tree::const_iterator< const_iterator;
+    typedef typename tree::iterator<Node const, T const> const_iterator;
     typedef typename Allocator::const_pointer const_pointer;
     typedef typename Allocator::const_reference const_reference;
     typedef typename Allocator::difference_type difference_type;
-    typedef typename traits::iterator iterator;
+    typedef typename tree::iterator<Node,T> iterator;
     typedef typename Allocator::pointer pointer;
     typedef typename Allocator::reference reference;
     typedef typename Allocator::size_type size_type;
     typedef typename Allocator::value_type value_type;
 
-    // Iterator types
-    typedef typename tree::iterator<node const, value_type const> const_iterator;
-    typedef typename tree::iterator<node,value_type> iterator;
-
     // Init/Uninit
-    explicit unbalanced_set(Compare const& compare = Compare(),
-                            Allocator const& allocator = Allocator());
+    explicit unbalanced_tree(Compare const& compare = Compare(),
+                             Allocator const& allocator = Allocator());
     //template <typename InputIterator>
     //unbalanced_set(InputIterator first, InputIterator last,
     //               Compare const& compare = Compare(),
@@ -58,6 +56,11 @@ namespace sib {
   private:
   };
 }
+
+/**
+ * Implementation
+ **/
+
 
 #endif /* SIB_UNBALANCED_SET_HPP */
 

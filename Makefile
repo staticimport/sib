@@ -21,7 +21,7 @@ OBJECTS_ROOT_DIR = build
 # Main Build Destination
 MAIN_ALL_OBJECTS := $(addprefix $(OBJECTS_ROOT_DIR)/,$(subst src/,,$(MAIN_CXX_ALL_COMPILABLE_FILES:.cpp=.o)))
 MAIN_IMPLEMENTATION_OBJECTS := $(addprefix $(OBJECTS_ROOT_DIR)/,$(subst src/,,$(MAIN_CXX_IMPLEMENTATION_FILES:.cpp=.o)))
-MAIN_OBJECT_DIRS := $(sort $(dir $(ALL_OBJECTS)))
+MAIN_OBJECT_DIRS := $(sort $(dir $(MAIN_ALL_OBJECTS)))
 MAIN_TARGET_LIBRARY = install/lib/libsib.a
 
 # Main Build Destination
@@ -38,14 +38,14 @@ OPTIMIZATION_FLAGS = -Ofast
 WARNING_FLAGS = -Wall -Werror
 
 # Main Compilation Flags
-MAIN_INCLUDE_PATH_FLAGS = $(foreach dir,$(sort $(dir $(MAIN_CXX_HEADER_FILES))),-I$(dir))
+MAIN_INCLUDE_PATH_FLAGS = $(foreach dir,$(MAIN_CXX_IMPLEMENTATION_FILES),-I$(dir))
 MAIN_CXX_FLAGS = $(WARNING_FLAGS) $(OPTIMIZATION_FLAGS) $(DEBUGGING_FLAGS) \
                 $(ENVIRONMENT_FLAGS) $(MISCELLANEOUS_FLAGS) \
                 $(MAIN_INCLUDE_PATH_FLAGS)
 main_cxx_flags_with_deps = $(MAIN_CXX_FLAGS) -MMD -MF $(1:.o=.d) -MT $1
 
 # Test Compilation Flags
-TEST_INCLUDE_PATH_FLAGS = -Iinstall/include $(foreach dir,$(sort $(dir $(TEST_CXX_HEADER_FILES))),-I$(dir))
+TEST_INCLUDE_PATH_FLAGS = -Iinstall/include $(foreach dir,$(TEST_CXX_SOURCE_ROOT_DIRS),-I$(dir))
 TEST_CXX_FLAGS = $(WARNING_FLAGS) $(OPTIMIZATION_FLAGS) $(DEBUGGING_FLAGS) \
                  $(ENVIRONMENT_FLAGS) $(MISCELLANEOUS_FLAGS) \
                  $(TEST_INCLUDE_PATH_FLAGS)
@@ -61,25 +61,27 @@ clean:
 	rm -rf build/* install/*
 
 main_init:
-	mkdir -p $(MAIN_OBJECT_DIRS) install/include install/lib
+	mkdir -p $(MAIN_OBJECT_DIRS) install/include/private install/lib
 
 main_compile: $(MAIN_ALL_OBJECTS) | main_init
 
 $(OBJECTS_ROOT_DIR)/main/%.o: $(GLOBAL_DEPENDENCIES)
-	$(CXX) $(call main_cxx_flags_with_deps,$@) -c src/$*.cpp -o $@
+	$(CXX) $(call main_cxx_flags_with_deps,$@) -c src/main/$*.cpp -o $@
 
 $(MAIN_TARGET_LIBRARY): $(MAIN_IMPLEMENTATION_OBJECTS)
 	ar rcs $(MAIN_TARGET_LIBRARY) $(MAIN_IMPLEMENTATION_OBJECTS)
 
 main_install: $(MAIN_CXX_HEADER_FILES)
-	cp $(MAIN_CXX_HEADER_FILES) install/include
+	cp src/main/*.hpp install/include
+	cp src/main/private/*.hpp install/include/private
 
 test_init: main_install
+	mkdir -p $(TEST_OBJECT_DIRS)
 
 test_compile: $(TEST_ALL_OBJECTS) | test_init
 
 $(OBJECTS_ROOT_DIR)/test/%.o: $(GLOBAL_DEPENDENCIES)
-	$(CXX) $(call test_cxx_flags_with_deps,$@) -c src/$*.cpp -o $@
+	$(CXX) $(call test_cxx_flags_with_deps,$@) -c src/test/$*.cpp -o $@
 
 $(TEST_TARGET_LIBRARY): $(TEST_IMPLEMENTATION_OBJECTS)
 	ar rcs $(TEST_TARGET_LIBRARY) $(TEST_IMPLEMENTATION_OBJECTS)

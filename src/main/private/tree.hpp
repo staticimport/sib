@@ -27,12 +27,32 @@ namespace sib {
       N* _node;
     };
 
-    template <typename T,
+    template <typename K,
+              typename T,
+              typename Node,
               typename Compare,
-              typename Allocator,
-              typename Node>
+              typename Allocator>`
     class tree {
-    protected:
+    public:
+      // Base types
+      typedef Allocator allocator_type;
+      typedef typename tree::iterator<Node const, T const> const_iterator;
+      typedef typename Allocator::const_pointer const_pointer;
+      typedef typename Allocator::const_reference const_reference;
+      typedef typename Allocator::difference_type difference_type;
+      typedef typename tree::iterator<Node,T> iterator;
+      typedef typename Allocator::pointer pointer;
+      typedef typename Allocator::reference reference;
+      typedef typename Allocator::size_type size_type;
+      typedef typename Allocator::value_type value_type;
+
+      explicit tree(Compare const& compare,
+                    Allocator const& allocator);
+      ~tree();
+
+      iterator find(K const& key);
+      const_iterator find(K const& key) const;
+      
       
       Compare _compare;
       Allocator _allocator;

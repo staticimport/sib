@@ -113,7 +113,7 @@ sib::dynamic_ring<T,C,A>::size() const
 
 template <typename T, bool C, typename A>
 inline void
-sib::ring<T,C,A>::finish_push()
+sib::dynamic_ring<T,C,A>::finish_push()
 {
   _write_ring->finish_push();
   if (_write_ring->size() == 1 and _read_ring != _write_ring) {
