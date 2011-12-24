@@ -14,7 +14,7 @@ namespace sib {
     template <typename T, typename Allocator>
     struct traits<T,false,Allocator> {
       typedef ring<T,false,Allocator> sub_ring;
-      typedef ring<T,false,Allocator> sub_ring_pointer;
+      typedef ring<T,false,Allocator>* sub_ring_pointer;
     };
   };
 
@@ -54,7 +54,7 @@ namespace sib {
     void advance_read_ring();
     void advance_write_ring();
 
-    typename Allocator::template rebind<traits::sub_ring>::other _ring_allocator;
+    typename Allocator::template rebind<typename traits::sub_ring>::other _ring_allocator;
     ring<typename traits::sub_ring_pointer,ConcurrentPushPop,Allocator> _expand_ring;
     typename traits::sub_ring_pointer _read_ring;
     typename traits::sub_ring_pointer _write_ring;
@@ -123,7 +123,7 @@ sib::dynamic_ring<T,C,A>::finish_push()
 }
 
 template <typename T, bool C, typename A>
-inline typename sib::ring<T,C,A>::reference
+inline typename sib::dynamic_ring<T,C,A>::reference
 sib::dynamic_ring<T,C,A>::front()
 {
   if (_read_ring->empty()) advance_read_ring();
@@ -158,7 +158,7 @@ sib::dynamic_ring<T,C,A>::start_push()
 
 template <typename T, bool C, typename A>
 void
-sib;:dynamic_ring<T,C,A>::advance_read_ring()
+sib::dynamic_ring<T,C,A>::advance_read_ring()
 {
   _read_ring->~ring();
   _ring_allocator.deallocate(_read_ring, 1);
@@ -171,7 +171,9 @@ void
 sib::dynamic_ring<T,C,A>::advance_write_ring()
 {
   size_type const next_capacity = _write_ring->capacity() * 2;
-  _write_ring = new
+  _write_ring = new(_ring_allocator.allocate(1)) 
+                typename traits::sub_ring(next_capacity);
+  _expand_ring.push(_write_ring);
 }
 
 #endif /* SIB_DYNAMIC_RING_HPP */

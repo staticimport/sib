@@ -142,3 +142,78 @@ BOOST_AUTO_TEST_CASE(ring_concurrent_safe)
   reader.join();
 }
 
+BOOST_AUTO_TEST_CASE(ring_const_iterator_begin_end)
+{
+  sib::ring<int,true> ring(16);
+  BOOST_CHECK(ring.cbegin() == ring.cend());
+  ring.push(1);
+  sib::ring<int,true>::const_iterator begin = ring.cbegin();
+  BOOST_CHECK(*begin == 1);
+  BOOST_CHECK(begin == begin);
+  BOOST_CHECK(begin != ring.cend());
+  BOOST_CHECK((begin + 1) == ring.cend());
+  BOOST_CHECK((1 + begin) == ring.cend());
+  BOOST_CHECK(begin == (ring.cend() - 1));
+  BOOST_CHECK((ring.cend() - begin) == sizeof(int));
+}
+
+BOOST_AUTO_TEST_CASE(ring_const_iterate)
+{
+  sib::ring<int,true> ring(16);
+  for(int ii = 0; ii != 16; ++ii) {
+    ring.push(ii);
+    auto iter = ring.cbegin();
+    for(int jj = 0; jj <= ii; ++jj) {
+      BOOST_CHECK(iter[jj] == jj);
+    }
+    for(int jj = 0; jj <= ii; ++jj) {
+      BOOST_CHECK(*iter == jj);
+      ++iter;
+    }
+    BOOST_CHECK(iter == ring.cend());
+    iter = ring.cbegin();
+    for(int jj = 0; jj <= ii; ++jj) {
+      BOOST_CHECK(*iter == jj);
+      auto copy = iter++;
+      BOOST_CHECK(*copy == jj);
+    }
+  }
+}
+
+BOOST_AUTO_TEST_CASE(ring_iterator_begin_end)
+{
+  sib::ring<int,true> ring(16);
+  BOOST_CHECK(ring.begin() == ring.end());
+  ring.push(1);
+  sib::ring<int,true>::iterator begin = ring.begin();
+  BOOST_CHECK(*begin == 1);
+  BOOST_CHECK(begin == begin);
+  BOOST_CHECK(begin != ring.end());
+  BOOST_CHECK((begin + 1) == ring.end());
+  BOOST_CHECK((1 + begin) == ring.end());
+  BOOST_CHECK(begin == (ring.end() - 1));
+  BOOST_CHECK((ring.end() - begin) == sizeof(int));
+}
+
+BOOST_AUTO_TEST_CASE(ring_iterate)
+{
+  sib::ring<int,true> ring(16);
+  for(int ii = 0; ii != 16; ++ii) {
+    ring.push(ii);
+    sib::ring<int,true>::iterator iter = ring.begin();
+    for(int jj = 0; jj <= ii; ++jj) {
+      BOOST_CHECK(iter[jj] == jj);
+    }
+    for(int jj = 0; jj <= ii; ++jj) {
+      BOOST_CHECK(*iter == jj);
+      ++iter;
+    }
+    BOOST_CHECK(iter == ring.end());
+    iter = ring.begin();
+    for(int jj = 0; jj <= ii; ++jj) {
+      BOOST_CHECK(*iter == jj);
+      auto copy = iter++;
+      BOOST_CHECK(*copy == jj);
+    }
+  }
+}

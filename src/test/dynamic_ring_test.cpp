@@ -14,7 +14,6 @@
 BOOST_AUTO_TEST_CASE(new_dynamic_ringempty)
 {
   sib::dynamic_ring<int> ring(16);
-  BOOST_CHECK(ring.capacity() == 16);
   BOOST_CHECK(ring.empty() == true);
   BOOST_CHECK(ring.size() == 0);
 }
@@ -43,7 +42,7 @@ BOOST_AUTO_TEST_CASE(dynamic_ringpop_all)
   for(auto ii = count; ii; --ii) {
     ring.push(static_cast<int>(ii));
   }
-  for(auto ii = count(); ii; --ii) {
+  for(auto ii = count; ii; --ii) {
     ring.pop();
   }
   BOOST_CHECK(ring.empty() == true);
@@ -78,12 +77,12 @@ BOOST_AUTO_TEST_CASE(dynamic_ringfifo)
 BOOST_AUTO_TEST_CASE(dynamic_ringsize)
 {
   sib::dynamic_ring<int> ring(1);
-  for(auto iter = 0; iter != 3; ++iter) {
-    for(sib::dynamic_ring<int>::size_type ii = 0; ii != ring.capacity(); ++ii) {
+  for(std::size_t iter = 0; iter != 3; ++iter) {
+    for(sib::dynamic_ring<int>::size_type ii = 0; ii != 100; ++ii) {
       ring.push(1);
       BOOST_CHECK(ring.size() == ii+1);
     }
-    for(auto ii = ring.capacity(); ii; --ii) {
+    for(std::size_t ii = 100; ii; --ii) {
       ring.pop();
       BOOST_CHECK(ring.size() == ii-1);
     }
@@ -91,7 +90,8 @@ BOOST_AUTO_TEST_CASE(dynamic_ringsize)
 }
 
 template <typename iterator>
-static void dynamic_ringread(sib::dynamic_ring<int,true>* ring, iterator begin, iterator end)
+static void dynamic_ringread(sib::dynamic_ring<int,true>* ring, 
+                             iterator begin, iterator end)
 {
   while (begin != end) {
     while (ring->empty()) ;
