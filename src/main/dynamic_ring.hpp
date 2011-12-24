@@ -70,7 +70,8 @@ sib::dynamic_ring<T,C,A>::dynamic_ring(
     A const& allocator)
 : _ring_allocator(allocator),
   _expand_ring(sizeof(void*) * 8),
-  _read_ring(new(_ring_allocator.allocate(1)) typename traits::sub_ring(min_capacity)), // TODO: pass allocator? ring_allocator?
+  _read_ring(new(_ring_allocator.allocate(1)) 
+             typename traits::sub_ring(min_capacity)), // TODO: pass allocator? ring_allocator?
   _write_ring(_read_ring)
 {
 }
