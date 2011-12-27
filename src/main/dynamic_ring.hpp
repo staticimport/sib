@@ -42,7 +42,7 @@ namespace sib {
     bool empty() const;
     //bool full() const; // Only implement this if a max_capacity is supported
     const_reference front() const;
-    size_type size() const;
+    size_type size(bool reader_context=true) const;
 
     // Non-Const
     void finish_push();
@@ -102,12 +102,29 @@ sib::dynamic_ring<T,C,A>::front() const
 
 template <typename T, bool C, typename A>
 typename sib::dynamic_ring<T,C,A>::size_type
-sib::dynamic_ring<T,C,A>::size() const
+sib::dynamic_ring<T,C,A>::size(bool reader_context) const
 {
-  size_type total(_read_ring->size());
-  auto expand_ring_end(_expand_ring.cend());
-  for(auto iter = _expand_ring.cbegin(); iter != expand_ring_end; ++iter) {
-    total += (*iter)->size();
+  size_type total(0);
+  if (!C) {
+    total += _read_ring->size();
+    auto expand_ring_end(_expand_ring.cend());
+    for(auto iter = _expand_ring.cbegin(); iter != expand_ring_end; ++iter) {
+      total += (*iter)->size();
+    }
+  } else if (reader_context) {
+    auto read_ring(_read_ring);
+    size_type const expand_count(_expand_ring.size());
+    total += read_ring.size();
+    for(size_type ii = 1; ii < expand_count; ++ii) {
+      total += read_ring.capacity() << ii;
+    }
+  } else {
+    auto write_ring(_write_ring);
+    size_type const expand_count(_expand_ring.size());
+    total += write_ring.size();
+    for(size_type ii = 1; ii < expand_count; ++ii) {
+      total += write_ring.capacity() >> ii;
+    }
   }
   return total;
 }

@@ -24,9 +24,9 @@ def test
   act()
   system('mkdir -p test')
   bdr = Act::GccBuilder.new({
-    :include => ['install/include'],
-    :libdir => ['install/lib'],
-    :lib => ['boost_unit_test_framework'],
+    :include => ['install/include','/usr/local/include/'],
+    :libdir => ['install/lib','/usr/local/lib'],
+    :lib => ['boost_unit_test_framework-mt'],
     :misc => ['std=c++0x'],
     :warn => ['all','error']})
   exe_tasks = TESTS.collect do |test|

@@ -1,6 +1,9 @@
 
 #include <queue>
+
+#ifdef _GLIBCXX_HAS_GTHREADS
 #include <thread>
+#endif
 
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_int_distribution.hpp>
@@ -105,7 +108,8 @@ BOOST_AUTO_TEST_CASE(ring_size)
 }
 
 template <typename iterator>
-static void ring_read(sib::ring<int,true>* ring, iterator begin, iterator end)
+static void ring_read(sib::ring<int,true>* ring, 
+                      iterator begin, iterator end)
 {
   while (begin != end) {
     while (ring->empty()) ;
@@ -116,7 +120,8 @@ static void ring_read(sib::ring<int,true>* ring, iterator begin, iterator end)
 }
 
 template <typename iterator>
-static void ring_write(sib::ring<int,true>* ring, iterator begin, iterator end)
+static void ring_write(sib::ring<int,true>* ring, 
+                       iterator begin, iterator end)
 {
   while (begin != end) {
     while (ring->full()) ;
@@ -125,6 +130,7 @@ static void ring_write(sib::ring<int,true>* ring, iterator begin, iterator end)
   }
 }
 
+#ifdef _GLIBCXX_HAS_GTHREADS
 BOOST_AUTO_TEST_CASE(ring_concurrent_safe)
 {
   sib::ring<int,true> ring(16);
@@ -141,6 +147,7 @@ BOOST_AUTO_TEST_CASE(ring_concurrent_safe)
   writer.join();
   reader.join();
 }
+#endif
 
 BOOST_AUTO_TEST_CASE(ring_const_iterator_begin_end)
 {
