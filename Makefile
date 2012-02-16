@@ -51,7 +51,7 @@ TEST_CXX_FLAGS = $(WARNING_FLAGS) $(OPTIMIZATION_FLAGS) $(DEBUGGING_FLAGS) \
                  $(TEST_INCLUDE_PATH_FLAGS)
 test_cxx_flags_with_deps = $(TEST_CXX_FLAGS) -MMD -MF $(1:.o=.d) -MT $1
 
-all: main
+all: main test
 
 main: main_init main_compile $(MAIN_TARGET_LIBRARY) main_install
 
@@ -69,7 +69,7 @@ $(OBJECTS_ROOT_DIR)/main/%.o: $(GLOBAL_DEPENDENCIES)
 	$(CXX) $(call main_cxx_flags_with_deps,$@) -c src/main/$*.cpp -o $@
 
 $(MAIN_TARGET_LIBRARY): $(MAIN_IMPLEMENTATION_OBJECTS)
-	ar rcs $(MAIN_TARGET_LIBRARY) $(MAIN_IMPLEMENTATION_OBJECTS)
+	#ar rcs $(MAIN_TARGET_LIBRARY) $(MAIN_IMPLEMENTATION_OBJECTS)
 
 main_install: $(MAIN_CXX_HEADER_FILES)
 	cp src/main/*.hpp install/include

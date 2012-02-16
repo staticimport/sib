@@ -19,7 +19,7 @@ namespace sib {
 
     template <bool NonEmpty>
     struct padding {
-      typedef char type[0];
+      //typedef char type[0];
     };
 
     template <>
@@ -30,23 +30,7 @@ namespace sib {
     template <typename T, bool ConcurrentPushPop>
     struct traits {
       typedef typename counter<ConcurrentPushPop>::type counter_type;
-      typedef typename padding<ConcurrentPushPop>::type padding_type;
-
-      class const_iterator {
-      public:
-
-        
-      private:
-        
-        T const* _array;
-        std::size_t _mask;
-        std::size_t _next;
-        std::size_t _end;
-      };
-
-      class iterator {
-
-      };
+      typedef padding<ConcurrentPushPop> padding_type;
     };
 
     template <typename T>
@@ -86,7 +70,7 @@ namespace sib {
       std::size_t _index;
       std::size_t _end;
     };
-  };
+  }
 
   template <typename T,
             bool ConcurrentPushPop=false,

@@ -27,18 +27,16 @@ def test
     :include => ['install/include','/usr/local/include/'],
     :libdir => ['install/lib','/usr/local/lib'],
     :lib => ['boost_unit_test_framework-mt'],
-    :misc => ['std=c++0x'],
+    :misc => ['std=c++0x', 'pedantic'],
     :warn => ['all','error']})
-  exe_tasks = TESTS.collect do |test|
-    bdr.executable("src/test/#{test}_test.cpp", "test/#{test}_test")
-  end
-  TESTS.collect do |test|
+  TESTS.each do |test|
+    exe = bdr.executable("src/test/#{test}_test.cpp", "test/#{test}_test")
     run_task = Act::Task.new do
       puts "---> testing #{test}"
       puts %x{#{"test/#{test}_test --report_level=detailed " +
                 "--show_progress=true --build_info=true 2>&1"}}
     end
-    run_task.depends.merge exe_tasks
+    run_task.depends.add exe
   end
 end
 
