@@ -7,53 +7,50 @@
 
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_int_distribution.hpp>
+#include <gtest/gtest.h>
 
 #include "ring.hpp"
 
-#define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE ring
-#include <boost/test/unit_test.hpp>
-
-BOOST_AUTO_TEST_CASE(new_ring_empty)
+TEST(ring, new_ring_empty)
 {
   sib::ring<int> ring(16);
-  BOOST_CHECK(ring.capacity() == 16);
-  BOOST_CHECK(ring.empty() == true);
-  BOOST_CHECK(ring.full() == false);
-  BOOST_CHECK(ring.size() == 0);
+  EXPECT_TRUE(ring.capacity() == 16);
+  EXPECT_TRUE(ring.empty() == true);
+  EXPECT_TRUE(ring.full() == false);
+  EXPECT_TRUE(ring.size() == 0);
 }
 
-BOOST_AUTO_TEST_CASE(ring_push_one)
+TEST(ring, ring_push_one)
 {
   sib::ring<int> ring(16);
   ring.push(423);
-  BOOST_CHECK(ring.empty() == false);
-  BOOST_CHECK(ring.full() == false);
-  BOOST_CHECK(ring.size() == 1);
+  EXPECT_TRUE(ring.empty() == false);
+  EXPECT_TRUE(ring.full() == false);
+  EXPECT_TRUE(ring.size() == 1);
 }
 
-BOOST_AUTO_TEST_CASE(ring_push_until_full)
+TEST(ring, ring_push_until_full)
 {
   sib::ring<int> ring(16);
   for(auto ii = ring.capacity(); ii; --ii) {
     ring.push(static_cast<int>(ii));
   }
-  BOOST_CHECK(ring.empty() == false);
-  BOOST_CHECK(ring.full() == true);
-  BOOST_CHECK(ring.size() == ring.capacity());
+  EXPECT_TRUE(ring.empty() == false);
+  EXPECT_TRUE(ring.full() == true);
+  EXPECT_TRUE(ring.size() == ring.capacity());
 }
 
-BOOST_AUTO_TEST_CASE(ring_pop_one)
+TEST(ring, ring_pop_one)
 {
   sib::ring<int> ring(16);
   ring.push(423);
   ring.pop();
-  BOOST_CHECK(ring.empty() == true);
-  BOOST_CHECK(ring.full() == false);
-  BOOST_CHECK(ring.size() == 0);
+  EXPECT_TRUE(ring.empty() == true);
+  EXPECT_TRUE(ring.full() == false);
+  EXPECT_TRUE(ring.size() == 0);
 }
 
-BOOST_AUTO_TEST_CASE(ring_pop_all)
+TEST(ring, ring_pop_all)
 {
   sib::ring<int> ring(16);
   for(auto ii = ring.capacity(); ii; --ii) {
@@ -62,19 +59,19 @@ BOOST_AUTO_TEST_CASE(ring_pop_all)
   for(auto ii = ring.capacity(); ii; --ii) {
     ring.pop();
   }
-  BOOST_CHECK(ring.empty() == true);
-  BOOST_CHECK(ring.full() == false);
-  BOOST_CHECK(ring.size() == 0);
+  EXPECT_TRUE(ring.empty() == true);
+  EXPECT_TRUE(ring.full() == false);
+  EXPECT_TRUE(ring.size() == 0);
 }
 
-BOOST_AUTO_TEST_CASE(ring_peek_one)
+TEST(ring, ring_peek_one)
 {
   sib::ring<int> ring(16);
   ring.push(2543);
-  BOOST_CHECK(ring.front() == 2543);
+  EXPECT_TRUE(ring.front() == 2543);
 }
 
-BOOST_AUTO_TEST_CASE(ring_fifo)
+TEST(ring, ring_fifo)
 {
   sib::ring<int> ring(16);
   boost::random::mt19937 rgen;
@@ -86,23 +83,23 @@ BOOST_AUTO_TEST_CASE(ring_fifo)
     ring.push(val);
   }
   for(auto ii = 0; ii != 16; ++ii) {
-    BOOST_CHECK(values.front() == ring.front());
+    EXPECT_TRUE(values.front() == ring.front());
     values.pop();
     ring.pop();
   }
 }
 
-BOOST_AUTO_TEST_CASE(ring_size)
+TEST(ring, ring_size)
 {
   sib::ring<int> ring(16);
   for(auto iter = 0; iter != 3; ++iter) {
     for(sib::ring<int>::size_type ii = 0; ii != ring.capacity(); ++ii) {
       ring.push(1);
-      BOOST_CHECK(ring.size() == ii+1);
+      EXPECT_TRUE(ring.size() == ii+1);
     }
     for(auto ii = ring.capacity(); ii; --ii) {
       ring.pop();
-      BOOST_CHECK(ring.size() == ii-1);
+      EXPECT_TRUE(ring.size() == ii-1);
     }
   }
 }
@@ -113,7 +110,7 @@ static void ring_read(sib::ring<int,true>* ring,
 {
   while (begin != end) {
     while (ring->empty()) ;
-    BOOST_CHECK(ring->front() == *begin);
+    EXPECT_TRUE(ring->front() == *begin);
     ring->pop();
     ++begin;
   }
@@ -131,7 +128,7 @@ static void ring_write(sib::ring<int,true>* ring,
 }
 
 #ifdef _GLIBCXX_HAS_GTHREADS
-BOOST_AUTO_TEST_CASE(ring_concurrent_safe)
+TEST(ring, ring_concurrent_safe)
 {
   sib::ring<int,true> ring(16);
   boost::random::mt19937 rgen;
@@ -149,78 +146,78 @@ BOOST_AUTO_TEST_CASE(ring_concurrent_safe)
 }
 #endif
 
-BOOST_AUTO_TEST_CASE(ring_const_iterator_begin_end)
+TEST(ring, ring_const_iterator_begin_end)
 {
   sib::ring<int,true> ring(16);
-  BOOST_CHECK(ring.cbegin() == ring.cend());
+  EXPECT_TRUE(ring.cbegin() == ring.cend());
   ring.push(1);
   sib::ring<int,true>::const_iterator begin = ring.cbegin();
-  BOOST_CHECK(*begin == 1);
-  BOOST_CHECK(begin == begin);
-  BOOST_CHECK(begin != ring.cend());
-  BOOST_CHECK((begin + 1) == ring.cend());
-  BOOST_CHECK((1 + begin) == ring.cend());
-  BOOST_CHECK(begin == (ring.cend() - 1));
-  BOOST_CHECK((ring.cend() - begin) == sizeof(int));
+  EXPECT_TRUE(*begin == 1);
+  EXPECT_TRUE(begin == begin);
+  EXPECT_TRUE(begin != ring.cend());
+  EXPECT_TRUE((begin + 1) == ring.cend());
+  EXPECT_TRUE((1 + begin) == ring.cend());
+  EXPECT_TRUE(begin == (ring.cend() - 1));
+  EXPECT_TRUE((ring.cend() - begin) == sizeof(int));
 }
 
-BOOST_AUTO_TEST_CASE(ring_const_iterate)
+TEST(ring, ring_const_iterate)
 {
   sib::ring<int,true> ring(16);
   for(int ii = 0; ii != 16; ++ii) {
     ring.push(ii);
     auto iter = ring.cbegin();
     for(int jj = 0; jj <= ii; ++jj) {
-      BOOST_CHECK(iter[jj] == jj);
+      EXPECT_TRUE(iter[jj] == jj);
     }
     for(int jj = 0; jj <= ii; ++jj) {
-      BOOST_CHECK(*iter == jj);
+      EXPECT_TRUE(*iter == jj);
       ++iter;
     }
-    BOOST_CHECK(iter == ring.cend());
+    EXPECT_TRUE(iter == ring.cend());
     iter = ring.cbegin();
     for(int jj = 0; jj <= ii; ++jj) {
-      BOOST_CHECK(*iter == jj);
+      EXPECT_TRUE(*iter == jj);
       auto copy = iter++;
-      BOOST_CHECK(*copy == jj);
+      EXPECT_TRUE(*copy == jj);
     }
   }
 }
 
-BOOST_AUTO_TEST_CASE(ring_iterator_begin_end)
+TEST(ring, ring_iterator_begin_end)
 {
   sib::ring<int,true> ring(16);
-  BOOST_CHECK(ring.begin() == ring.end());
+  EXPECT_TRUE(ring.begin() == ring.end());
   ring.push(1);
   sib::ring<int,true>::iterator begin = ring.begin();
-  BOOST_CHECK(*begin == 1);
-  BOOST_CHECK(begin == begin);
-  BOOST_CHECK(begin != ring.end());
-  BOOST_CHECK((begin + 1) == ring.end());
-  BOOST_CHECK((1 + begin) == ring.end());
-  BOOST_CHECK(begin == (ring.end() - 1));
-  BOOST_CHECK((ring.end() - begin) == sizeof(int));
+  EXPECT_TRUE(*begin == 1);
+  EXPECT_TRUE(begin == begin);
+  EXPECT_TRUE(begin != ring.end());
+  EXPECT_TRUE((begin + 1) == ring.end());
+  EXPECT_TRUE((1 + begin) == ring.end());
+  EXPECT_TRUE(begin == (ring.end() - 1));
+  EXPECT_TRUE((ring.end() - begin) == sizeof(int));
 }
 
-BOOST_AUTO_TEST_CASE(ring_iterate)
+TEST(ring, ring_iterate)
 {
   sib::ring<int,true> ring(16);
   for(int ii = 0; ii != 16; ++ii) {
     ring.push(ii);
     sib::ring<int,true>::iterator iter = ring.begin();
     for(int jj = 0; jj <= ii; ++jj) {
-      BOOST_CHECK(iter[jj] == jj);
+      EXPECT_TRUE(iter[jj] == jj);
     }
     for(int jj = 0; jj <= ii; ++jj) {
-      BOOST_CHECK(*iter == jj);
+      EXPECT_TRUE(*iter == jj);
       ++iter;
     }
-    BOOST_CHECK(iter == ring.end());
+    EXPECT_TRUE(iter == ring.end());
     iter = ring.begin();
     for(int jj = 0; jj <= ii; ++jj) {
-      BOOST_CHECK(*iter == jj);
+      EXPECT_TRUE(*iter == jj);
       auto copy = iter++;
-      BOOST_CHECK(*copy == jj);
+      EXPECT_TRUE(*copy == jj);
     }
   }
 }

@@ -6,15 +6,19 @@
 namespace sib {
   namespace ns_dynamic_ring {
     template <typename T, bool ConcurrentPushPop, typename Allocator>
-    struct traits {
-      typedef ring<T,ConcurrentPushPop,Allocator> sub_ring;
-      typedef ring<T,ConcurrentPushPop,Allocator>* volatile sub_ring_pointer;
+    struct traits { // TODO: fix these to actually use the allocator!
+      //typedef ring<T,ConcurrentPushPop,Allocator> sub_ring;
+      //typedef ring<T,ConcurrentPushPop,Allocator>* volatile sub_ring_pointer;
+      typedef ring<T,ConcurrentPushPop> sub_ring;
+      typedef ring<T,ConcurrentPushPop>* volatile sub_ring_pointer;
     };
 
     template <typename T, typename Allocator>
     struct traits<T,false,Allocator> {
-      typedef ring<T,false,Allocator> sub_ring;
-      typedef ring<T,false,Allocator>* sub_ring_pointer;
+      //typedef ring<T,false,Allocator> sub_ring;
+      //typedef ring<T,false,Allocator>* sub_ring_pointer;
+      typedef ring<T,false> sub_ring;
+      typedef ring<T,false>* sub_ring_pointer;
     };
   };
 
@@ -55,7 +59,8 @@ namespace sib {
     void advance_write_ring();
 
     typename Allocator::template rebind<typename traits::sub_ring>::other _ring_allocator;
-    ring<typename traits::sub_ring_pointer,ConcurrentPushPop,Allocator> _expand_ring;
+    //ring<typename traits::sub_ring_pointer,ConcurrentPushPop,Allocator> _expand_ring;
+    ring<typename traits::sub_ring_pointer> _expand_ring;
     typename traits::sub_ring_pointer _read_ring;
     typename traits::sub_ring_pointer _write_ring;
   };
@@ -114,16 +119,16 @@ sib::dynamic_ring<T,C,A>::size(bool reader_context) const
   } else if (reader_context) {
     auto read_ring(_read_ring);
     size_type const expand_count(_expand_ring.size());
-    total += read_ring.size();
+    total += read_ring->size();
     for(size_type ii = 1; ii < expand_count; ++ii) {
-      total += read_ring.capacity() << ii;
+      total += read_ring->capacity() << ii;
     }
   } else {
     auto write_ring(_write_ring);
     size_type const expand_count(_expand_ring.size());
-    total += write_ring.size();
+    total += write_ring->size();
     for(size_type ii = 1; ii < expand_count; ++ii) {
-      total += write_ring.capacity() >> ii;
+      total += write_ring->capacity() >> ii;
     }
   }
   return total;
@@ -144,7 +149,7 @@ inline typename sib::dynamic_ring<T,C,A>::reference
 sib::dynamic_ring<T,C,A>::front()
 {
   if (_read_ring->empty()) advance_read_ring();
-  return _read_ring.front();
+  return _read_ring->front();
 }
 
 template <typename T, bool C, typename A>
@@ -179,7 +184,7 @@ sib::dynamic_ring<T,C,A>::advance_read_ring()
 {
   _read_ring->~ring();
   _ring_allocator.deallocate(_read_ring, 1);
-  _read_ring = _expand_ring.peek();
+  _read_ring = _expand_ring.front();
   _expand_ring.pop();
 }
 

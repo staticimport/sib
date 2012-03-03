@@ -1,41 +1,41 @@
 
 #include <queue>
+#ifdef _GLIBCXX_HAS_GTHREADS
 #include <thread>
+#endif
 
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_int_distribution.hpp>
+#include <gtest/gtest.h>
 
 #include "dynamic_ring.hpp"
 
-#define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE ring
-#include <boost/test/unit_test.hpp>
-
-BOOST_AUTO_TEST_CASE(new_dynamic_ringempty)
+/*
+TEST(dynamic_ring, new_dynamic_ringempty)
 {
   sib::dynamic_ring<int> ring(16);
-  BOOST_CHECK(ring.empty() == true);
-  BOOST_CHECK(ring.size() == 0);
+  EXPECT_TRUE(ring.empty() == true);
+  EXPECT_TRUE(ring.size() == 0);
 }
 
-BOOST_AUTO_TEST_CASE(dynamic_ringpush_one)
+TEST(dynamic_ring, dynamic_ringpush_one)
 {
   sib::dynamic_ring<int> ring(16);
   ring.push(423);
-  BOOST_CHECK(ring.empty() == false);
-  BOOST_CHECK(ring.size() == 1);
+  EXPECT_TRUE(ring.empty() == false);
+  EXPECT_TRUE(ring.size() == 1);
 }
 
-BOOST_AUTO_TEST_CASE(dynamic_ringpop_one)
+TEST(dynamic_ring, dynamic_ringpop_one)
 {
   sib::dynamic_ring<int> ring(16);
   ring.push(423);
   ring.pop();
-  BOOST_CHECK(ring.empty() == true);
-  BOOST_CHECK(ring.size() == 0);
+  EXPECT_TRUE(ring.empty() == true);
+  EXPECT_TRUE(ring.size() == 0);
 }
 
-BOOST_AUTO_TEST_CASE(dynamic_ringpop_all)
+TEST(dynamic_ring, dynamic_ringpop_all)
 {
   sib::dynamic_ring<int> ring(1);
   sib::dynamic_ring<int>::size_type count = 100;
@@ -45,18 +45,18 @@ BOOST_AUTO_TEST_CASE(dynamic_ringpop_all)
   for(auto ii = count; ii; --ii) {
     ring.pop();
   }
-  BOOST_CHECK(ring.empty() == true);
-  BOOST_CHECK(ring.size() == 0);
+  EXPECT_TRUE(ring.empty() == true);
+  EXPECT_TRUE(ring.size() == 0);
 }
 
-BOOST_AUTO_TEST_CASE(dynamic_ringpeek_one)
+TEST(dynamic_ring, dynamic_ringpeek_one)
 {
   sib::dynamic_ring<int> ring(1);
   ring.push(2543);
-  BOOST_CHECK(ring.front() == 2543);
+  EXPECT_TRUE(ring.front() == 2543);
 }
 
-BOOST_AUTO_TEST_CASE(dynamic_ringfifo)
+TEST(dynamic_ring, dynamic_ringfifo)
 {
   sib::dynamic_ring<int> ring(1);
   boost::random::mt19937 rgen;
@@ -68,34 +68,34 @@ BOOST_AUTO_TEST_CASE(dynamic_ringfifo)
     ring.push(val);
   }
   for(auto ii = 0; ii != 16; ++ii) {
-    BOOST_CHECK(values.front() == ring.front());
+    EXPECT_TRUE(values.front() == ring.front());
     values.pop();
     ring.pop();
   }
 }
 
-BOOST_AUTO_TEST_CASE(dynamic_ringsize)
+TEST(dynamic_ring, dynamic_ringsize)
 {
   sib::dynamic_ring<int> ring(1);
   for(std::size_t iter = 0; iter != 3; ++iter) {
     for(sib::dynamic_ring<int>::size_type ii = 0; ii != 100; ++ii) {
       ring.push(1);
-      BOOST_CHECK(ring.size() == ii+1);
+      EXPECT_TRUE(ring.size() == ii+1);
     }
     for(std::size_t ii = 100; ii; --ii) {
       ring.pop();
-      BOOST_CHECK(ring.size() == ii-1);
+      EXPECT_TRUE(ring.size() == ii-1);
     }
   }
-}
+}*/
 
-template <typename iterator>
+/*template <typename iterator>
 static void dynamic_ringread(sib::dynamic_ring<int,true>* ring, 
                              iterator begin, iterator end)
 {
   while (begin != end) {
     while (ring->empty()) ;
-    BOOST_CHECK(ring->front() == *begin);
+    EXPECT_TRUE(ring->front() == *begin);
     ring->pop();
     ++begin;
   }
@@ -110,7 +110,7 @@ static void dynamic_ringwrite(sib::dynamic_ring<int,true>* ring, iterator begin,
   }
 }
 
-BOOST_AUTO_TEST_CASE(dynamic_ringconcurrent_safe)
+TEST(dynamic_ring, dynamic_ringconcurrent_safe)
 {
   sib::dynamic_ring<int,true> ring(16);
   boost::random::mt19937 rgen;
@@ -125,5 +125,5 @@ BOOST_AUTO_TEST_CASE(dynamic_ringconcurrent_safe)
                      &ring, values.cbegin(), values.cend());
   writer.join();
   reader.join();
-}
+}*/
 

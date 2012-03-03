@@ -26,15 +26,15 @@ MAIN_TARGET_LIBRARY = install/lib/libsib.a
 
 # Main Build Destination
 TEST_ALL_OBJECTS := $(addprefix $(OBJECTS_ROOT_DIR)/,$(subst src/,,$(TEST_CXX_ALL_COMPILABLE_FILES:.cpp=.o)))
-TEST_IMPLEMENTATION_OBJECTS := $(addprefix $(OBJECTS_ROOT_DIR)/,$(subst src/,,$(TEST_CXX_IMPLEMENTATION_FILES:.cpp=.o)))
+#TEST_IMPLEMENTATION_OBJECTS := $(addprefix $(OBJECTS_ROOT_DIR)/,$(subst src/,,$(TEST_CXX_IMPLEMENTATION_FILES:.cpp=.o)))
+#TEST_IMPLEMENTATION_OBJECTS := $(addprefix $(OBJECTS_ROOT_DIR)/,$(subst src/,,$(TEST_CXX_IMPLEMENTATION_FILES:.cpp=.o)))
 TEST_OBJECT_DIRS := $(sort $(dir $(TEST_ALL_OBJECTS)))
-TEST_TARGET_LIBRARY = install/lib/libtestsib.a
 
 # Common Compilation Flags
 DEBUGGING_FLAGS = -g3 -ggdb
 ENVIRONMENT_FLAGS = -pthread -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
 MISCELLANEOUS_FLAGS = -std=c++0x -pipe
-OPTIMIZATION_FLAGS = -Ofast
+OPTIMIZATION_FLAGS = -O3
 WARNING_FLAGS = -Wall -Werror
 
 # Main Compilation Flags
@@ -45,13 +45,17 @@ MAIN_CXX_FLAGS = $(WARNING_FLAGS) $(OPTIMIZATION_FLAGS) $(DEBUGGING_FLAGS) \
 main_cxx_flags_with_deps = $(MAIN_CXX_FLAGS) -MMD -MF $(1:.o=.d) -MT $1
 
 # Test Compilation Flags
-TEST_INCLUDE_PATH_FLAGS = -Iinstall/include $(foreach dir,$(TEST_CXX_SOURCE_ROOT_DIRS),-I$(dir))
+TEST_INCLUDE_PATH_FLAGS = -I$(GTEST_ROOT)/include -Iinstall/include $(foreach dir,$(TEST_CXX_SOURCE_ROOT_DIRS),-I$(dir))
 TEST_CXX_FLAGS = $(WARNING_FLAGS) $(OPTIMIZATION_FLAGS) $(DEBUGGING_FLAGS) \
                  $(ENVIRONMENT_FLAGS) $(MISCELLANEOUS_FLAGS) \
                  $(TEST_INCLUDE_PATH_FLAGS)
 test_cxx_flags_with_deps = $(TEST_CXX_FLAGS) -MMD -MF $(1:.o=.d) -MT $1
 
-all: main test
+# Test Linking Flags
+TEST_LIBRARY_PATH_FLAGS = -L$(GTEST_ROOT)/lib -Linstall/lib
+TEST_LIBRARY_LINK_FLAGS = -lgtest
+
+all: main test_run
 
 main: main_init main_compile $(MAIN_TARGET_LIBRARY) main_install
 
@@ -69,26 +73,43 @@ $(OBJECTS_ROOT_DIR)/main/%.o: $(GLOBAL_DEPENDENCIES)
 	$(CXX) $(call main_cxx_flags_with_deps,$@) -c src/main/$*.cpp -o $@
 
 $(MAIN_TARGET_LIBRARY): $(MAIN_IMPLEMENTATION_OBJECTS)
-	#ar rcs $(MAIN_TARGET_LIBRARY) $(MAIN_IMPLEMENTATION_OBJECTS)
+	@#ar rcs $(MAIN_TARGET_LIBRARY) $(MAIN_IMPLEMENTATION_OBJECTS)
 
 main_install: $(MAIN_CXX_HEADER_FILES)
 	cp src/main/*.hpp install/include
 	cp src/main/private/*.hpp install/include/private
 
-test_init: main_install
-	mkdir -p $(TEST_OBJECT_DIRS)
+test_init: main_install check_test_env
+	echo $(TEST_IMPLEMENTATION_OBJECTS)
+	mkdir -p $(TEST_OBJECT_DIRS) bin
+
+check_test_env:
+	@if test "$(GMOCK_ROOT)" = ""; then \
+	  echo "Environment variable GMOCK_ROOT not set!"; \
+	  exit 1; \
+	fi
+	@if test "$(GTEST_ROOT)" = ""; then \
+	  echo "Environment variable GTEST_ROOT not set!"; \
+	  exit 1; \
+	fi
 
 test_compile: $(TEST_ALL_OBJECTS) | test_init
 
-$(OBJECTS_ROOT_DIR)/test/%.o: $(GLOBAL_DEPENDENCIES)
+$(OBJECTS_ROOT_DIR)/test/%.o: test_init
 	$(CXX) $(call test_cxx_flags_with_deps,$@) -c src/test/$*.cpp -o $@
 
-$(TEST_TARGET_LIBRARY): $(TEST_IMPLEMENTATION_OBJECTS)
+$(TEST_TARGET_LIBRARY): $(TEST_ALL_OBJECTS)
 	ar rcs $(TEST_TARGET_LIBRARY) $(TEST_IMPLEMENTATION_OBJECTS)
+
+bin/test-all: test_compile
+	$(CXX) $(TEST_CXX_FLAGS) $(TEST_LIBRARY_PATH_FLAGS) $(TEST_LIBRARY_LINK_FLAGS) $(TEST_ALL_OBJECTS) -o bin/test-all
+
+test_run: bin/test-all
+	./bin/test-all
 
 %.d:
 
-.PHONY: all main test clean main_init main_compile main_install test_init test_compile test_install test_run
+.PHONY: all main test clean main_init main_compile main_install test_init test_compile test_install test_run check_test_env
 
 define depends_include_template
 -include $(1)
