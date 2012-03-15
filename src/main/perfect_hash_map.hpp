@@ -5,6 +5,8 @@
 #include <boost/functional/hash.hpp>
 #include <cstddef>
 
+#include "hash.hpp"
+
 namespace sib
 {
   template <typename T>
@@ -14,8 +16,16 @@ namespace sib
 
     inline std::size_t operator()(T const& x, int seed)
   {
-    std::size_t const hash(_std_hash(x));
-    return hash ^ (hash >> (seed & 63)) ^ (hash >> ((seed >> 6) & 63));
+    /*std::size_t const hash(_std_hash(x));
+    std::size_t result(hash);
+    do {
+      result ^= (hash >> (seed & 63));
+      seed >>= 6;
+    } while (seed);
+    return result;*/
+    //return hash ^ (hash >> (seed & 63)) ^ (hash >> ((seed >> 6) & 63)) ^
+    //  (hash >> ((seed >> 12) & 63)) ^ (hash >> ((seed >> 18) & 63)) ^
+    //  (hash >> ((seed >> 24) & 63));
 
     //std::size_t hash(seed);
     //boost::hash_combine(hash, x);
@@ -36,6 +46,29 @@ namespace sib
     }
     return result;*/
 
+    std::size_t hash(_std_hash(x));
+    if (seed) hash ^= (hash >> 8) & seed;
+    if (seed < 64)
+      return hash >> seed;
+    else {
+      return hash ^ ((hash >> 32) & seed);
+    }
+    //std::size_t hash(_std_hash(x));
+    //return (hash >> (seed & 63)) ^ seed;
+
+    /*std::size_t hash(_std_hash(x));
+    std::size_t result = hash ^((hash >> (seed & 63)) & seed);
+    if (seed < 64)
+      return result;
+    else {
+    char const* hash_bytes = reinterpret_cast<char const*>(&hash);
+    for(unsigned ii = 0; ii != sizeof(std::size_t); ++ii) {
+      result *= 1099511628211;
+      result ^= hash_bytes[ii];
+    }
+    return result;
+    }*/
+
     //std::size_t hash(seed);
     //boost::hash_combine(hash, x);
     /*std::size_t const seed_szt(seed);
@@ -54,7 +87,7 @@ namespace sib
 
   template <typename K, 
             typename V, 
-            typename seed_hash=sib::seed_hash<K> >
+            typename seed_hash=sib::hash<K> >//sib::seed_hash<K> >
   class perfect_hash_map
   {
   public:
@@ -86,6 +119,7 @@ namespace sib
     seed_hash _seed_hash;
     std::size_t _key_count;
     std::size_t _mask;
+    int _init_seed;
     int* _seeds;
     std::pair<K,V>* _begin;
     std::pair<K,V>* _end;

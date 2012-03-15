@@ -56,6 +56,24 @@ namespace sib
     _mask = bucket_count - 1;
     //std::cout << "mask=" << _mask << std::endl;
 
+    // Pick best seed
+    int best_seed = -1;
+    std::size_t best_dispersal_count = 0;
+    for(int seed = 0; seed != 100; ++seed) {
+      std::set<std::size_t> indices;
+      for(typename std::vector<K>::const_iterator iter = keys.begin();
+          iter != keys.end();
+          ++iter)
+      {
+        indices.insert(_seed_hash(*iter,seed) & _mask);
+      }
+      if (indices.size() > best_dispersal_count) {
+        best_dispersal_count = indices.size();
+        best_seed = seed;
+      }
+    }
+    _init_seed = best_seed;
+
     std::vector<std::vector<K*>*> buckets;
     for(std::size_t ii = 0; ii != bucket_count; ++ii) {
       buckets.push_back(new std::vector<K*>());
@@ -64,7 +82,7 @@ namespace sib
         iter != keys.end(); 
         ++iter)
     {
-      std::size_t index = _seed_hash(*iter,0) & _mask;
+      std::size_t index = _seed_hash(*iter,_init_seed) & _mask;
       std::vector<K*>* bucket = buckets[index];
       K& key = *iter;
       bucket->push_back(&key);
@@ -74,6 +92,7 @@ namespace sib
     std::sort(buckets.begin(), buckets.end(), sib_internal::ptr_max_size_compare<std::vector<K*> >());
     _seeds = new int[bucket_count];
     _begin = new std::pair<K,V>[bucket_count];
+    _end = _begin + bucket_count;
     bool* used_entries = new bool[bucket_count];
     for(std::size_t ii = 0; ii != bucket_count; ++ii) {
       _seeds[ii] = SIB_PERFECT_HASH_INVALID_SEED;
@@ -84,7 +103,12 @@ namespace sib
       std::vector<K*>* bucket = buckets[bucket_index];
       //std::cout << "bucket_index=" << bucket_index << ", count=" 
       //  << bucket->size() << std::endl;
-      if (bucket->empty()) continue;
+      if (bucket->empty()) 
+        continue;
+      else if (bucket->size() == 1) {
+        _seeds[bucket_index] = -1;
+        continue;
+      }
       std::size_t index = 0;
       int seed = 1;
       std::set<std::size_t> used_new_slots;
@@ -105,7 +129,7 @@ namespace sib
           ++index;
         }
       }
-      std::size_t seed_index = _seed_hash(*((*bucket)[0]),0) & _mask;
+      std::size_t seed_index = _seed_hash(*((*bucket)[0]),_init_seed) & _mask;
       _seeds[seed_index] = seed;
       //std::cout << "seeds[" << seed_index << "] = " << seed << std::endl;
       for(std::size_t jj = 0; jj != bucket->size(); ++jj) {
@@ -117,6 +141,10 @@ namespace sib
         used_entries[entry_index] = true;
       }
     }
+    for(std::size_t ii = 0; ii != buckets.size(); ++ii)
+      delete buckets[ii];
+    delete used_entries;
+
     _key_count = count;
   }
   
@@ -144,8 +172,10 @@ namespace sib
   inline typename perfect_hash_map<K,V,H>::const_iterator
   perfect_hash_map<K,V,H>::find(K const& key) const
   {
-    std::size_t const seed_index = _seed_hash(key,0) & _mask;
-    return &(_begin[_seed_hash(key,_seeds[seed_index]) & _mask]);
+    std::size_t const seed_index = _seed_hash(key,_init_seed) & _mask;
+    int const seed = _seeds[seed_index];
+    return seed == -1 ? &(_begin[seed_index]) :
+      &(_begin[_seed_hash(key,seed) & _mask]);
   }
 
   template <typename K, typename V, typename H>
@@ -158,16 +188,20 @@ namespace sib
   inline typename perfect_hash_map<K,V,H>::iterator
   perfect_hash_map<K,V,H>::find(K const& key)
   {
-    std::size_t const seed_index = _seed_hash(key,0) & _mask;
-    return &(_begin[_seed_hash(key,_seeds[seed_index]) & _mask]);
+    std::size_t const seed_index = _seed_hash(key,_init_seed) & _mask;
+    int const seed = _seeds[seed_index];
+    return seed == -1 ? &(_begin[seed_index]) :
+      &(_begin[_seed_hash(key,seed) & _mask]);
   }
  
   template <typename K, typename V, typename H>
   inline std::pair<typename perfect_hash_map<K,V,H>::iterator,bool>
   perfect_hash_map<K,V,H>::insert(perfect_hash_map<K,V,H>::value_type const& x)
   {
-    std::size_t const seed_index = _seed_hash(x.first,0) & _mask;
-    std::pair<K,V>* entry = _begin + (_seed_hash(x.first, _seeds[seed_index]));
+    std::size_t const seed_index = _seed_hash(x.first,_init_seed) & _mask;
+    int const seed = _seeds[seed_index];
+    std::pair<K,V>* entry = seed == -1 ? _begin + seed_index :
+      _begin + (_seed_hash(x.first, seed) & _mask);
     entry->second = x.second;
     return std::pair<iterator,bool>(entry,true);
   }
