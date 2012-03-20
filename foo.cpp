@@ -10,10 +10,9 @@
 
 using namespace sib;
 
-//#define COUNT 10000000
-#define COUNT 3
+#define COUNT 10000000
 
-#define USE_SIB
+//#define USE_SIB
 
 typedef double KEY;
 static const KEY EMPTY_KEY = -1.0;
@@ -22,8 +21,8 @@ static const KEY TARGET = (KEY)COUNT;
 int main(void)
 {
 #ifdef USE_SIB
-  //sib::hash_map<KEY,std::size_t> map;
-  sib::vector_hash_map<KEY,std::size_t> map;
+  sib::simple_hash_map<KEY,std::size_t> map;
+  //sib::vector_hash_map<KEY,std::size_t> map;
 #else
   //std::map<std::size_t,std::size_t> map;
   //std::unordered_map<std::size_t,std::size_t> map;

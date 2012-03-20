@@ -5,14 +5,14 @@
 
 template <typename K, typename T, typename H, typename A>
 sib::vector_hash_map<K,T,H,A>::vector_hash_map(double const load_factor)
-: _capacity(1 << 12)
+: _capacity(1 << 24)
 , _mask(_capacity - 1)
 , _size(0)
 , _load_factor(load_factor)
 , _resize(1 + static_cast<std::size_t>(load_factor * _capacity))
 , _buckets(static_cast<pod**>(calloc(_capacity, sizeof(pod*))))
-, _pool(sizeof(entry))
-, _mask_bits(11)
+, _pool(sizeof(pod))
+, _mask_bits(24)
 {
 }
 
@@ -127,7 +127,7 @@ sib::vector_hash_map<K,T,H,A>::index(std::size_t const hash) const
 template <typename K, typename T, typename H, typename A>
 void sib::vector_hash_map<K,T,H,A>::expand()
 {
-  /*std::size_t const old_capacity = _capacity;
+  std::size_t const old_capacity = _capacity;
   _capacity <<= 1;
   _mask = _capacity - 1;
   ++_mask_bits;
@@ -162,14 +162,18 @@ void sib::vector_hash_map<K,T,H,A>::expand()
         }
       }
       pod* next = p->_next;
+#ifdef USE_POOL
       p->~pod();
       _pool.release(p);
+#else
+      delete p;
+#endif
       p = next;
     }
   }
   free(_buckets);
   _buckets = new_buckets;
-  _resize = 1 + static_cast<std::size_t>(_load_factor * _capacity);*/
+  _resize = 1 + static_cast<std::size_t>(_load_factor * _capacity);
 }
 
 template <typename K, typename T, typename H, typename A>
