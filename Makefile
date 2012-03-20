@@ -34,7 +34,7 @@ TEST_OBJECT_DIRS := $(sort $(dir $(TEST_ALL_OBJECTS)))
 DEBUGGING_FLAGS = -g3 -ggdb
 ENVIRONMENT_FLAGS = -pthread -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
 MISCELLANEOUS_FLAGS = -std=c++0x -pipe
-OPTIMIZATION_FLAGS = -O3
+OPTIMIZATION_FLAGS = -O0
 WARNING_FLAGS = -Wall -Werror
 
 # Main Compilation Flags
@@ -76,7 +76,7 @@ $(MAIN_TARGET_LIBRARY): $(MAIN_IMPLEMENTATION_OBJECTS)
 	@#ar rcs $(MAIN_TARGET_LIBRARY) $(MAIN_IMPLEMENTATION_OBJECTS)
 
 main_install: $(MAIN_CXX_HEADER_FILES)
-	cp src/main/*.hpp install/include
+	cp src/main/*.hpp src/main/*.inl install/include
 	cp src/main/private/*.hpp install/include/private
 
 test_init: main_install check_test_env

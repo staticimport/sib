@@ -2,19 +2,12 @@
 #define SIB_HASH_HPP
 
 #include <cstddef>
+#include <string>
 
 namespace sib
 {
   inline std::size_t fnv_hash(char const* begin, char const* const end,
-                              std::size_t const seed=0)
-  {
-    std::size_t hash(seed);
-    while (begin != end) {
-      hash ^= *(begin++);
-      hash *= 1099511628211;
-    }
-    return hash;
-  }
+                              std::size_t const seed=0);
 
   template <typename T>
   inline std::size_t hash_value(T const& x, std::size_t const seed=0)
@@ -39,6 +32,8 @@ namespace sib
     }
   };
 }
+
+#include "hash.inl"
 
 #endif /* SIB_HASH_HPP */
 
