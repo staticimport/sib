@@ -26,6 +26,7 @@ sib::vector_hash_map<K,T,H,A>::~vector_hash_map()
 template <typename K, typename T, typename H, typename A>
 void sib::vector_hash_map<K,T,H,A>::clear()
 {
+  std::size_t count(0);
   for(std::size_t ii = 0; ii != _capacity; ++ii) {
     pod* p = _buckets[ii];
     while (p) {
@@ -35,11 +36,17 @@ void sib::vector_hash_map<K,T,H,A>::clear()
 #else
       delete p;
 #endif
+      ++count;
       p = tmp;
     }
     _buckets[ii] = NULL;
   }
+  std::cout << "allocates: " << _pool.allocate_calls
+    << ", releases: " << _pool.release_calls << ", mallocs: " << _pool.mallocs
+    << std::endl;
+  _pool.clear_stats();
   _size = 0;
+  _pool._print_on_alloc = true;
 }
 
 template <typename K, typename T, typename H, typename A>
@@ -94,6 +101,7 @@ inline T& sib::vector_hash_map<K,T,H,A>::operator[](typename param<K>::type key)
 #endif
     for(unsigned ii = 1; ii != VHM_ENTRIES_PER_VECTOR; ++ii)
       p->_entries[ii]._hash = 0;
+    p->_next = *bucket;
     *bucket = p;
     available = p->_entries;
   }
@@ -127,6 +135,7 @@ sib::vector_hash_map<K,T,H,A>::index(std::size_t const hash) const
 template <typename K, typename T, typename H, typename A>
 void sib::vector_hash_map<K,T,H,A>::expand()
 {
+  std::cout << "EXPANDING!\n";
   std::size_t const old_capacity = _capacity;
   _capacity <<= 1;
   _mask = _capacity - 1;

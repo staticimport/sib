@@ -22,7 +22,7 @@ namespace sib
 
   template <typename K, 
             typename T, 
-            typename Hash=std::hash<K>,
+            typename Hash=sib::hash<K>,
             typename Alloc=std::allocator<vector_hash_map_entry<K,T> > >
   class vector_hash_map
   {

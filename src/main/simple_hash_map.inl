@@ -1,7 +1,7 @@
 
 #include <cstdlib>
 
-#define USE_POOL
+//#define USE_POOL
 
 template <typename K, typename T, typename H, typename A>
 sib::simple_hash_map<K,T,H,A>::simple_hash_map(double const load_factor)
@@ -33,7 +33,7 @@ void sib::simple_hash_map<K,T,H,A>::clear()
 #ifndef USE_POOL
       delete e;
 #else
-      //_pool.release(e);
+      _pool.release(e);
 #endif
       e = tmp;
     }

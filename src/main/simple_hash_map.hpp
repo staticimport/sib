@@ -24,7 +24,7 @@ namespace sib
   class simple_hash_map
   {
   public:
-    simple_hash_map(double const load_factor = 0.6);
+    simple_hash_map(double const load_factor = 0.7);
     ~simple_hash_map();
 
     // Const
