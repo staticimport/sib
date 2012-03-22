@@ -65,7 +65,10 @@ namespace sib
   }
 
   template <typename K, typename T, typename C, typename E>
-  cluster_map<K,T,C,E>::
+  inline std::size_t cluster_map<K,T,C,E>::distance(typename param<K>::type key)
+  {
+
+  }
   template <typename K, typename T, typename C, typename E>
   cluster_map<K,T,C,E>::
   template <typename K, typename T, typename C, typename E>
