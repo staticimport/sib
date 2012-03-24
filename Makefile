@@ -31,14 +31,14 @@ TEST_ALL_OBJECTS := $(addprefix $(OBJECTS_ROOT_DIR)/,$(subst src/,,$(TEST_CXX_AL
 TEST_OBJECT_DIRS := $(sort $(dir $(TEST_ALL_OBJECTS)))
 
 # Common Compilation Flags
-DEBUGGING_FLAGS = -g3 -ggdb
+DEBUGGING_FLAGS = -ggdb3
 ENVIRONMENT_FLAGS = -pthread -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
-MISCELLANEOUS_FLAGS = -std=c++0x -pipe
-OPTIMIZATION_FLAGS = -O0
+MISCELLANEOUS_FLAGS = -pipe
+OPTIMIZATION_FLAGS = -O3
 WARNING_FLAGS = -Wall -Werror
 
 # Main Compilation Flags
-MAIN_INCLUDE_PATH_FLAGS = $(foreach dir,$(MAIN_CXX_IMPLEMENTATION_FILES),-I$(dir))
+MAIN_INCLUDE_PATH_FLAGS = -I$(BOOST_ROOT)/include -Isrc/main #$(foreach dir,$(MAIN_CXX_IMPLEMENTATION_FILES),-I$(dir))
 MAIN_CXX_FLAGS = $(WARNING_FLAGS) $(OPTIMIZATION_FLAGS) $(DEBUGGING_FLAGS) \
                 $(ENVIRONMENT_FLAGS) $(MISCELLANEOUS_FLAGS) \
                 $(MAIN_INCLUDE_PATH_FLAGS)
@@ -64,8 +64,14 @@ test: main test_init test_compile $(TEST_TARGET_LIBRARY) test_install test_run
 clean:
 	rm -rf build/* install/*
 
-main_init:
-	mkdir -p $(MAIN_OBJECT_DIRS) install/include/private install/lib
+main_init: | check_main_env
+	mkdir -p $(MAIN_OBJECT_DIRS) install/include/internal install/lib
+
+check_main_env:
+	@if test "$(BOOST_ROOT)" = ""; then \
+	  echo "Environment variable BOOST_ROOT not set!"; \
+	  exit 1; \
+	fi
 
 main_compile: $(MAIN_ALL_OBJECTS) | main_init
 
@@ -75,9 +81,10 @@ $(OBJECTS_ROOT_DIR)/main/%.o: $(GLOBAL_DEPENDENCIES)
 $(MAIN_TARGET_LIBRARY): $(MAIN_IMPLEMENTATION_OBJECTS)
 	@#ar rcs $(MAIN_TARGET_LIBRARY) $(MAIN_IMPLEMENTATION_OBJECTS)
 
-main_install: $(MAIN_CXX_HEADER_FILES)
-	cp src/main/*.hpp src/main/*.inl install/include
-	cp src/main/private/*.hpp install/include/private
+main_install: | main_compile
+	cp src/main/*.hpp install/include
+	find src/main/internal -name "*.hpp" | xargs -I {} cp {} install/include/internal
+	find src/main/internal -name "*.inl" | xargs -I {} cp {} install/include/internal
 
 test_init: main_install check_test_env
 	echo $(TEST_IMPLEMENTATION_OBJECTS)
@@ -109,7 +116,7 @@ test_run: bin/test-all
 
 %.d:
 
-.PHONY: all main test clean main_init main_compile main_install test_init test_compile test_install test_run check_test_env
+.PHONY: all main test clean main_init main_compile main_install test_init test_compile test_install test_run check_test_env check_main_env
 
 define depends_include_template
 -include $(1)

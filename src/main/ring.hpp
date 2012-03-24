@@ -176,7 +176,7 @@ template <typename T>
 inline sib::ns_ring::iterator<T>
 sib::ns_ring::iterator<T>::operator++(int)
 {
-  auto iter(*this);
+  iterator<T> iter(*this);
   ++_index;
   return iter;
 }
@@ -193,7 +193,7 @@ template <typename T>
 inline sib::ns_ring::iterator<T>
 sib::ns_ring::iterator<T>::operator--(int)
 {
-  auto iter(*this);
+  iterator<T> iter(*this);
   --_index;
   return iter;
 }
@@ -342,7 +342,7 @@ template <typename T, bool C, typename A>
 inline typename sib::ring<T,C,A>::const_iterator
 sib::ring<T,C,A>::cend() const
 {
-  auto const push_count = _push_count;
+  std::size_t const push_count = _push_count;
   return const_iterator(_array, _mask, push_count, push_count);
 }
 
@@ -378,7 +378,7 @@ template <typename T, bool C, typename A>
 inline typename sib::ring<T,C,A>::iterator
 sib::ring<T,C,A>::end()
 {
-  auto const push_count = _push_count;
+  std::size_t const push_count = _push_count;
   return iterator(_array, _mask, push_count, push_count);
 }
 

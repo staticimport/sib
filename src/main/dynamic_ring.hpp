@@ -58,6 +58,8 @@ namespace sib {
     void advance_read_ring();
     void advance_write_ring();
 
+    typedef typename ring<typename traits::sub_ring_pointer>::const_iterator expand_ring_citer;
+
     typename Allocator::template rebind<typename traits::sub_ring>::other _ring_allocator;
     //ring<typename traits::sub_ring_pointer,ConcurrentPushPop,Allocator> _expand_ring;
     ring<typename traits::sub_ring_pointer> _expand_ring;
@@ -112,19 +114,19 @@ sib::dynamic_ring<T,C,A>::size(bool reader_context) const
   size_type total(0);
   if (!C) {
     total += _read_ring->size();
-    auto expand_ring_end(_expand_ring.cend());
-    for(auto iter = _expand_ring.cbegin(); iter != expand_ring_end; ++iter) {
+    expand_ring_citer end = _expand_ring.cend();
+    for(expand_ring_citer iter = _expand_ring.cbegin(); iter != end; ++iter) {
       total += (*iter)->size();
     }
   } else if (reader_context) {
-    auto read_ring(_read_ring);
+    typename traits::sub_ring_pointer read_ring(_read_ring);
     size_type const expand_count(_expand_ring.size());
     total += read_ring->size();
     for(size_type ii = 1; ii < expand_count; ++ii) {
       total += read_ring->capacity() << ii;
     }
   } else {
-    auto write_ring(_write_ring);
+    typename traits::sub_ring_pointer write_ring(_write_ring);
     size_type const expand_count(_expand_ring.size());
     total += write_ring->size();
     for(size_type ii = 1; ii < expand_count; ++ii) {

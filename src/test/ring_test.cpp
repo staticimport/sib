@@ -32,7 +32,7 @@ TEST(ring, ring_push_one)
 TEST(ring, ring_push_until_full)
 {
   sib::ring<int> ring(16);
-  for(auto ii = ring.capacity(); ii; --ii) {
+  for(std::size_t ii = ring.capacity(); ii; --ii) {
     ring.push(static_cast<int>(ii));
   }
   EXPECT_TRUE(ring.empty() == false);
@@ -53,10 +53,10 @@ TEST(ring, ring_pop_one)
 TEST(ring, ring_pop_all)
 {
   sib::ring<int> ring(16);
-  for(auto ii = ring.capacity(); ii; --ii) {
+  for(std::size_t ii = ring.capacity(); ii; --ii) {
     ring.push(static_cast<int>(ii));
   }
-  for(auto ii = ring.capacity(); ii; --ii) {
+  for(std::size_t ii = ring.capacity(); ii; --ii) {
     ring.pop();
   }
   EXPECT_TRUE(ring.empty() == true);
@@ -77,12 +77,12 @@ TEST(ring, ring_fifo)
   boost::random::mt19937 rgen;
   boost::random::uniform_int_distribution<> dist;
   std::queue<int> values;
-  for(auto ii = 0; ii != 16; ++ii) {
-    auto val = dist(rgen);
+  for(std::size_t ii = 0; ii != 16; ++ii) {
+    int val = dist(rgen);
     values.push(val);
     ring.push(val);
   }
-  for(auto ii = 0; ii != 16; ++ii) {
+  for(std::size_t ii = 0; ii != 16; ++ii) {
     EXPECT_TRUE(values.front() == ring.front());
     values.pop();
     ring.pop();
@@ -92,12 +92,12 @@ TEST(ring, ring_fifo)
 TEST(ring, ring_size)
 {
   sib::ring<int> ring(16);
-  for(auto iter = 0; iter != 3; ++iter) {
+  for(std::size_t iter = 0; iter != 3; ++iter) {
     for(sib::ring<int>::size_type ii = 0; ii != ring.capacity(); ++ii) {
       ring.push(1);
       EXPECT_TRUE(ring.size() == ii+1);
     }
-    for(auto ii = ring.capacity(); ii; --ii) {
+    for(std::size_t ii = ring.capacity(); ii; --ii) {
       ring.pop();
       EXPECT_TRUE(ring.size() == ii-1);
     }
@@ -134,7 +134,7 @@ TEST(ring, ring_concurrent_safe)
   boost::random::mt19937 rgen;
   boost::random::uniform_int_distribution<> dist;
   std::vector<int> values;
-  for(auto ii = 0; ii != 20000; ++ii) {
+  for(std::size_t ii = 0; ii != 20000; ++ii) {
     values.push_back(dist(rgen));
   }
   std::thread reader(ring_read<std::vector<int>::const_iterator>,
@@ -166,7 +166,7 @@ TEST(ring, ring_const_iterate)
   sib::ring<int,true> ring(16);
   for(int ii = 0; ii != 16; ++ii) {
     ring.push(ii);
-    auto iter = ring.cbegin();
+    sib::ring<int,true>::const_iterator iter = ring.cbegin();
     for(int jj = 0; jj <= ii; ++jj) {
       EXPECT_TRUE(iter[jj] == jj);
     }
@@ -178,7 +178,7 @@ TEST(ring, ring_const_iterate)
     iter = ring.cbegin();
     for(int jj = 0; jj <= ii; ++jj) {
       EXPECT_TRUE(*iter == jj);
-      auto copy = iter++;
+      sib::ring<int,true>::const_iterator copy = iter++;
       EXPECT_TRUE(*copy == jj);
     }
   }
@@ -216,7 +216,7 @@ TEST(ring, ring_iterate)
     iter = ring.begin();
     for(int jj = 0; jj <= ii; ++jj) {
       EXPECT_TRUE(*iter == jj);
-      auto copy = iter++;
+      sib::ring<int,true>::iterator copy = iter++;
       EXPECT_TRUE(*copy == jj);
     }
   }

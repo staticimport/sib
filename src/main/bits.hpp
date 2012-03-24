@@ -10,7 +10,7 @@ namespace sib
   Integer power2_above(Integer x, bool inclusive=true);
 }
 
-#include "inlines/bits.inl"
+#include "internal/bits.inl"
 
 #endif /* SIB_BITS_HPP */
 
