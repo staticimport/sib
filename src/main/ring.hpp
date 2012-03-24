@@ -5,6 +5,8 @@
 #include <iterator>
 #include <memory>
 
+#include "bits.hpp"
+
 namespace sib {
   namespace ns_ring {
     template <bool Volatile>
@@ -286,7 +288,7 @@ template <typename T, bool C, typename A>
 sib::ring<T,C,A>::ring(sib::ring<T,C,A>::size_type const min_capacity,
                        A const& allocator)
 : _array_allocator(allocator),
-  _capacity(min_capacity), // TODO: power of 2
+  _capacity(power2_above<size_type>(min_capacity)),
   _mask(_capacity - 1),
   _array(_array_allocator.allocate(_capacity)),
   _pop_count(0),
