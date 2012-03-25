@@ -10,7 +10,6 @@
 
 #include "dynamic_ring.hpp"
 
-/*
 TEST(dynamic_ring, new_dynamic_ringempty)
 {
   sib::dynamic_ring<int> ring(16);
@@ -38,11 +37,11 @@ TEST(dynamic_ring, dynamic_ringpop_one)
 TEST(dynamic_ring, dynamic_ringpop_all)
 {
   sib::dynamic_ring<int> ring(1);
-  sib::dynamic_ring<int>::size_type count = 100;
-  for(auto ii = count; ii; --ii) {
+  sib::dynamic_ring<int>::size_type count = 200;
+  for(std::size_t ii = count; ii; --ii) {
     ring.push(static_cast<int>(ii));
   }
-  for(auto ii = count; ii; --ii) {
+  for(std::size_t ii = count; ii; --ii) {
     ring.pop();
   }
   EXPECT_TRUE(ring.empty() == true);
@@ -62,12 +61,12 @@ TEST(dynamic_ring, dynamic_ringfifo)
   boost::random::mt19937 rgen;
   boost::random::uniform_int_distribution<> dist;
   std::queue<int> values;
-  for(auto ii = 0; ii != 16; ++ii) {
-    auto val = dist(rgen);
+  for(std::size_t ii = 0; ii != 16; ++ii) {
+    int val = dist(rgen);
     values.push(val);
     ring.push(val);
   }
-  for(auto ii = 0; ii != 16; ++ii) {
+  for(std::size_t ii = 0; ii != 16; ++ii) {
     EXPECT_TRUE(values.front() == ring.front());
     values.pop();
     ring.pop();
@@ -87,7 +86,7 @@ TEST(dynamic_ring, dynamic_ringsize)
       EXPECT_TRUE(ring.size() == ii-1);
     }
   }
-}*/
+}
 
 /*template <typename iterator>
 static void dynamic_ringread(sib::dynamic_ring<int,true>* ring, 
@@ -116,7 +115,7 @@ TEST(dynamic_ring, dynamic_ringconcurrent_safe)
   boost::random::mt19937 rgen;
   boost::random::uniform_int_distribution<> dist;
   std::vector<int> values;
-  for(auto ii = 0; ii != 20000; ++ii) {
+  for(std::size_t ii = 0; ii != 20000; ++ii) {
     values.push_back(dist(rgen));
   }
   std::thread reader(dynamic_ringread<std::vector<int>::const_iterator>,

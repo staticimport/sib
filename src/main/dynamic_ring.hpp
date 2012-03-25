@@ -1,6 +1,8 @@
 #ifndef SIB_DYNAMIC_RING_HPP
 #define SIB_DYNAMIC_RING_HPP
 
+#include <exception>
+
 #include "ring.hpp"
 
 namespace sib {
@@ -158,16 +160,23 @@ template <typename T, bool C, typename A>
 inline void
 sib::dynamic_ring<T,C,A>::pop()
 {
-  _read_ring->pop();
+  if (!_read_ring->empty()) {
+    _read_ring->pop();
+  } else if (!_expand_ring.empty()) {
+    advance_read_ring();
+    _read_ring->pop();
+  } else
+    throw std::runtime_error("attempted pop of empy dynamic_ring.");
 }
 
 template <typename T, bool C, typename A>
 inline void
 sib::dynamic_ring<T,C,A>::push(T const& x)
 {
-  if (_write_ring->full()) advance_write_ring();
+  bool advanced(false);
+  if (_write_ring->full()) { advanced = true; advance_write_ring(); }
   _write_ring->push(x);
-  if (_write_ring->size() == 1 and _read_ring != _write_ring) {
+  if (advanced) {
     _expand_ring.push(_write_ring);
   }
 }
@@ -197,7 +206,7 @@ sib::dynamic_ring<T,C,A>::advance_write_ring()
   size_type const next_capacity = _write_ring->capacity() * 2;
   _write_ring = new(_ring_allocator.allocate(1)) 
                 typename traits::sub_ring(next_capacity);
-  _expand_ring.push(_write_ring);
+  //_expand_ring.push(_write_ring);
 }
 
 #endif /* SIB_DYNAMIC_RING_HPP */
