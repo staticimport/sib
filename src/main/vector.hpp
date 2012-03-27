@@ -1,10 +1,10 @@
-#ifndef SIB_POD_VECTOR_HPP
-#define SIB_POD_VECTOR_HPP
+#ifndef SIB_VECTOR_HPP
+#define SIB_VECTOR_HPP
 
 namespace sib
 {
-  template <typename T, typename Allocator = std::allocator<T> >
-  class pod_vector
+  template <typename T, bool IsPod=boost::is_pod<T> >
+  class vector
   {
   private:
     typedef typename param<T>::type param_type;
@@ -23,51 +23,64 @@ namespace sib
     typedef typename Allocator::value_type        value_type;
 
     // Init/Uninit
-    explicit pod_vector(Allocator const& alloc = Allocator());
-    template <typename input_iterator>
-    pod_vector(input_iterator first, input_iterator last,
+    explicit vector(size_type const reserve_capacity=8);
+    /*template <typename input_iterator>
+    vector(input_iterator first, input_iterator last,
                Allocator const& alloc = Allocator());
-    pod_vector(pod_vector const& vector);
-    ~pod_vector();
+    vector(vector const& vector);*/
+    ~vector();
 
-    // Const
+    // element access
     const_reference at(size_type pos) const;
-    const_reference back() const              { return *(_end-1); }
-    SIB_NOEXCEPT const_iterator begin() const { return _begin; }
-    SIB_NOEXCEPT size_type capacity() const   { return _capacity_end - _begin; }
-    int compare(pod_vector const& vector) const;
-    T const* data() const                     { return _begin; }
-    SIB_NOEXCEPT bool empty() const           { return _begin == _end; }
-    SIB_NOEXCEPT const_iterator end() const   { return _end; }
-    const_reference front() const             { return *_begin; }
-    SIB_NOEXCEPT size_type max_size() const;
-    SIB_NOEXCEPT size_type size() const       { return _end - _begin; }
-    const_reference operator[](size_type pos) const { return _begin[pos]; }
-
-    // Non-Const
     reference at(size_type pos);
-    reference back()                  { return *(_end-1); }
-    SIB_NOEXCEPT iterator begin()     { return _begin; }
-    SIB_NOEXCEPT void clear()         { _end = _begin; }
-    T* data()                         { return _data; }
-    SIB_NOEXCEPT iterator end()       { return _end; }
-    reference front()                 { return *_begin; }
-    void pop_back()                   { --_end; }
+    const_reference back() const                    { return *(_end-1); }
+    reference back()                                { return *(_end-1); }
+    T const* data() const                           { return _begin; }
+    T* data()                                       { return _data; }
+    const_reference front() const                   { return *_begin; }
+    reference front()                               { return *_begin; }
+    const_reference operator[](size_type pos) const { return _begin[pos]; }
+    reference operator[](size_type pos)             { return _begin[pos]; }
+
+    // iterators
+    SIB_NOEXCEPT iterator begin()               { return _begin; }
+    SIB_NOEXCEPT const_iterator begin() const   { return _begin; }
+    SIB_NOEXCEPT const_iterator cbegin() const  { return _begin; }
+    SIB_NOEXCEPT iterator end()                 { return _end; }
+    SIB_NOEXCEPT const_iterator end() const     { return _end; }
+    SIB_NOEXCEPT const_iterator cend() const    { return _end; }
+    SIB_NOEXCEPT reverse_iterator rbegin();
+    //SIB_NOEXCEPT const_reverse_iterator rbegin() const;
+    //SIB_NOEXCEPT const_reverse_iterator crbegin() const;
+    SIB_NOEXCEPT reverse_iterator rend();
+    //SIB_NOEXCEPT const_reverse_iterator rend() const;
+    //SIB_NOEXCEPT const_reverse_iterator crend() const;
+
+    // capacity
+    SIB_NOEXCEPT size_type capacity() const   { return _capacity_end - _begin; }
+    SIB_NOEXCEPT bool empty() const           { return _begin == _end; }
+    SIB_NOEXCEPT size_type max_size() const;
+    void reserve(size_type capacity);
+    SIB_NOEXCEPT size_type size() const       { return _end - _begin; }
+
+    // modifiers
+    SIB_NOEXCEPT void clear();
+    iterator erase(iterator pos);
+    iterator insert(iterator pos, param_type value);
+    void pop_back();
     void push_back(param_type x);
-    SIB_NOEXCEPT iterator rbegin()    { return reverse_iterator(_end-1); }
-    SIB_NOEXCEPT iterator rend()      { return reverse_iterator(_begin-1); }
     void reserve(size_type size);
-    void swap(pod_vector& vector);
-    reference operator[](size_type pos) { return _begin[pos]; }
+    void swap(vector& vector);
+    vector& operator=(vector const& vector);
 
 #ifdef SIB_CXX11
-    pod_vector(size_type count, T const& value,
+    /*vector(size_type count, T const& value,
                Allocator const& alloc = Allocator());
-    explicit pod_vector(size_type count);
-    pod_vector(pod_vector const& vector, Allocator const& alloc);
-    pod_vector(pod_vector&& vector);
-    pod_vector(pod_vector&& vector, Allocator const& alloc);
-    pod_vector(std::initializer_list<T> init, 
+    explicit vector(size_type count);
+    vector(vector const& vector, Allocator const& alloc);
+    vector(vector&& vector);
+    vector(vector&& vector, Allocator const& alloc);
+    vector(std::initializer_list<T> init, 
                Allocator const& alloc = Allocator());
     SIB_NOEXCEPT const_iterator cbegin() const     { return _begin; }
     SIB_NOEXCEPT const_iterator cend() const       { return _end; }
@@ -88,9 +101,9 @@ namespace sib
     void push_back(T&& value);
     void resize(size_type count);
     void resize(size_type count, param_type value);
-    void shrink_to_fit();
+    void shrink_to_fit();*/
 #else
-    explicit pod_vector(size_type count, T const& value = T(),
+    /*explicit vector(size_type count, T const& value = T(),
                         Allocator const& alloc = Allocator());
     iterator erase(iterator pos);
     iterator erase(iterator first, iterator last);
@@ -98,32 +111,31 @@ namespace sib
     void insert(iterator pos, T const& value);
     template <typename input_iterator>
     void insert(iterator pos, input_iterator first, input_iterator last);
-    void resize(size_type count, T value = T());
+    void resize(size_type count, T value = T());*/
 #endif
   private:
-    friend class pod_vector_test;
+    friend class vector_test;
 
-    Allocator& _allocator;
     T* _begin;
     T* _end;
     T* _capacity_end;
   };
 }
 
+/*template <typename T, typename Alloc>
+bool operator==(vector<T,Alloc> const& lhs, vector<T,Alloc> const& rhs);
 template <typename T, typename Alloc>
-bool operator==(vector<T,Alloc> const& lhs, pod_vector<T,Alloc> const& rhs);
+bool operator!=(vector<T,Alloc> const& lhs, vector<T,Alloc> const& rhs);
 template <typename T, typename Alloc>
-bool operator!=(vector<T,Alloc> const& lhs, pod_vector<T,Alloc> const& rhs);
+bool operator<(vector<T,Alloc> const& lhs, vector<T,Alloc> const& rhs);
 template <typename T, typename Alloc>
-bool operator<(vector<T,Alloc> const& lhs, pod_vector<T,Alloc> const& rhs);
+bool operator<=(vector<T,Alloc> const& lhs, vector<T,Alloc> const& rhs);
 template <typename T, typename Alloc>
-bool operator<=(vector<T,Alloc> const& lhs, pod_vector<T,Alloc> const& rhs);
+bool operator>(vector<T,Alloc> const& lhs, vector<T,Alloc> const& rhs);
 template <typename T, typename Alloc>
-bool operator>(vector<T,Alloc> const& lhs, pod_vector<T,Alloc> const& rhs);
-template <typename T, typename Alloc>
-bool operator>=(vector<T,Alloc> const& lhs, pod_vector<T,Alloc> const& rhs);
+bool operator>=(vector<T,Alloc> const& lhs, vector<T,Alloc> const& rhs);*/
 
-#include "pod_vector.inl"
+#include "internal/vector.inl"
 
-#endif /* SIB_POD_VECTOR_HPP */
+#endif /* SIB_VECTOR_HPP */
 
