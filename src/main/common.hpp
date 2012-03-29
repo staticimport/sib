@@ -8,10 +8,14 @@
 
 #ifdef __GXX_EXPERIMENTAL_CXX0X__
 #define SIB_CXX11
-#define SIB_NOEXCEPT noexcept
+//#define SIB_NOEXCEPT noexcept
+#define SIB_NOEXCEPT 
 #else
 #define SIB_NOEXCEPT 
 #endif
+
+#define SIB_LIKELY(x) __builtin_expect((x),1)
+#define SIB_UNLIKELY(x) __builtin_expect((x),0)
 
 namespace sib
 {

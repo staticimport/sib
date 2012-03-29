@@ -1,15 +1,17 @@
 #ifndef SIB_VECTOR_TABLE_HPP
 #define SIB_VECTOR_TABLE_HPP
 
-#include <vector>
+//#include <vector>
+#include "../vector.hpp"
 
 namespace sib {
   template <typename K, typename V, typename Equal>
   class vector_table {
   private:
-    typedef std::vector<V> vector;
+    //typedef std::vector<V> vector;
+    typedef sib::vector<V> vector;
   public:
-    typedef typename vector::allocator_type allocator_type;
+    //typedef typename vector::allocator_type allocator_type;
     typedef typename vector::const_iterator const_iterator;
     typedef typename vector::const_reference const_reference;
     typedef typename vector::const_reverse_iterator const_reverse_iterator;

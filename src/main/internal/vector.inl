@@ -1,4 +1,8 @@
 
+#include <cstdlib>
+#include <stdexcept>
+#include <utility>
+
 namespace sib { namespace internal
 {
   template <typename T, bool IsPod=false>
@@ -6,7 +10,7 @@ namespace sib { namespace internal
   {
     static inline T* alloc(std::size_t const capacity)
     {
-      return malloc(capacity * sizeof(T));
+      return static_cast<T*>(malloc(capacity * sizeof(T)));
     }
 
     static inline void destruct(T* x) { x->~T(); }
@@ -17,13 +21,19 @@ namespace sib { namespace internal
         i->~T();
     }
 
-    static inline T* expand(T* alloced, std::size_t size, std::size_t new_cap)
+    static T* expand(T* alloced, std::size_t size, std::size_t new_cap)
     {
       T* const new_alloced = static_cast<T*>(malloc(new_cap * sizeof(T)));
-      T* const end = alloced + size;
-      for(T* i = alloced; i != end; ++i) {
-        new(new_alloced[i]) T(*i);
-        destruct(i);
+      T* const new_end = new_alloced + size;
+      T* from = alloced;
+      T* to = new_alloced;
+      while (to != new_end) {
+#ifdef SIB_CXX11
+        new(to++) T(std::move(*from));
+#else
+        new(to++) T(*from);
+#endif
+        destruct(from++);
       }
       release(alloced);
       return new_alloced;
@@ -35,7 +45,11 @@ namespace sib { namespace internal
       T* const end = src + count;
       for(T* i = src; i != end; ++i) {
         destruct(next);
+#ifdef SIB_CXX11
+        new(next++) T(std::move(*i));
+#else
         new(next++) T(*i);
+#endif
       }
       for(; next != end; ++next)
         destruct(next);
@@ -45,7 +59,11 @@ namespace sib { namespace internal
     {
       T* to = dest + count;
       for(T* i = src + count; i != src; ++i) {
+#ifdef SIB_CXX11
+        new(to--) T(std::move(*i));
+#else
         new(to--) T(*i);
+#endif
         destruct(i);
       }
     }
@@ -58,7 +76,7 @@ namespace sib { namespace internal
   {
     static inline T* alloc(std::size_t const capacity)
     {
-      return malloc(capacity * sizeof(T));
+      return static_cast<T*>(malloc(capacity * sizeof(T)));
     }
 
     static inline void destruct(T* x) { }
@@ -67,7 +85,7 @@ namespace sib { namespace internal
 
     static inline T* expand(T* alloced, std::size_t size, std::size_t new_cap)
     {
-      return realloc(alloced, new_cap * sizeof(T));
+      return static_cast<T*>(realloc(alloced, new_cap * sizeof(T)));
     }
 
     static inline void move_left(T* src, T* dest, std::size_t count)
@@ -86,17 +104,29 @@ namespace sib { namespace internal
 
 template <typename T, bool P>
 sib::vector<T,P>::vector(size_type const reserve_capacity)
-: _begin(vector_helper<T,P>::alloc(reserve_capacity))
+: _begin(internal::vector_helper<T,P>::alloc(reserve_capacity))
 , _end(_begin)
 , _capacity_end(_begin + reserve_capacity)
 {
 }
 
 template <typename T, bool P>
+sib::vector<T,P>::vector(vector const& other)
+: _begin(internal::vector_helper<T,P>::alloc(other.size()))
+, _end(_begin + other.size())
+, _capacity_end(_end)
+{
+  T* to = _begin;
+  T* from = other._begin;
+  while (to != _end)
+    new(to++) T(*(from++));
+}
+
+template <typename T, bool P>
 sib::vector<T,P>::~vector()
 {
-  vector_helper<T,P>::destruct(_begin, _end);
-  vector_helper<T,P>::release(_begin);
+  internal::vector_helper<T,P>::destruct(_begin, _end);
+  internal::vector_helper<T,P>::release(_begin);
 }
 
 template <typename T, bool P>
@@ -125,31 +155,31 @@ template <typename T, bool P>
 inline typename sib::vector<T,P>::reverse_iterator
 sib::vector<T,P>::rbegin()
 {
-  return std::reverse_iterator(_end);
+  return reverse_iterator(_end);
 }
 
 template <typename T, bool P>
 inline typename sib::vector<T,P>::reverse_iterator
 sib::vector<T,P>::rend()
 {
-  return std::reverse_iterator(_begin);
+  return reverse_iterator(_begin);
 }
 
 template <typename T, bool P>
-inline typename sib::vector<T,P>::max_size
-sib::vector<T,P>::max_size()
+inline typename sib::vector<T,P>::size_type
+sib::vector<T,P>::max_size() const
 {
   return ((sizeof(size_type)) << 8) / sizeof(T);
 }
 
 template <typename T, bool P>
-inline void sib::vector<T,P>::reserve(size_type capacity)
+inline void sib::vector<T,P>::reserve(size_type count)
 {
-  if (capacity() < capacity) {
+  if (capacity() < count) {
     size_type const the_size = size();
-    _begin = vector_helper<T,P>::expand(_begin, the_size, capacity);
+    _begin = internal::vector_helper<T,P>::expand(_begin, the_size, count);
     _end = _begin + the_size;
-    _capacity_end = _begin + capacity;
+    _capacity_end = _begin + count;
   }
 }
 
@@ -188,9 +218,46 @@ inline void sib::vector<T,P>::pop_back()
 template <typename T, bool P>
 inline void sib::vector<T,P>::push_back(param_type x)
 {
-  if (_end == _capacity_end)
+  if (_end != _capacity_end)
+    new(_end++) T(x);
+  else {
     reserve(capacity() << 1);
-  new(_end++) T(x);
+    new(_end++) T(x);
+  }
 }
 
-// TODO: reserve, swap, =
+template <typename T, bool P>
+inline void sib::vector<T,P>::resize(size_type count)
+{
+  size_type const old_size = size();
+  if (count > old_size) {
+    reserve(count);
+    _end = _begin + count;
+    for(T* t = _begin + old_size; t != _end; ++t)
+      new(t) T();
+  } else {
+    size_type const old_end = _end;
+    _end = _begin + count;
+    internal::vector_helper<T,P>::destruct(_end, old_end);
+  }
+}
+
+template <typename T, bool P>
+inline void sib::vector<T,P>::swap(vector& other)
+{
+  std::swap(_begin, other._begin);
+  std::swap(_end, other._end);
+  std::swap(_capacity_end, other._capacity_end);
+}
+
+template <typename T, bool P>
+inline sib::vector<T,P>&
+sib::vector<T,P>::operator=(vector const& other)
+{
+  if (this != &other) {
+    vector copy(other);
+    swap(other);
+  }
+  return *this;
+}
+

@@ -17,11 +17,11 @@ TEST(vector_map, new_vector_map_empty)
 TEST(vector_map, insert_one)
 {
   sib::vector_map<int,int> map;
-  std::pair<int,int> x(1,2);
+  std::pair<int,int> x(1,123);
   map.insert(x);
   EXPECT_FALSE(map.empty());
   EXPECT_EQ(SZT(1), map.size());
-  EXPECT_EQ(123, map.at(0));
-  EXPECT_EQ(123, map[0]);
+  EXPECT_EQ(123, map.at(1));
+  EXPECT_EQ(123, map[1]);
 }
 

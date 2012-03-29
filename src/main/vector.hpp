@@ -1,15 +1,32 @@
 #ifndef SIB_VECTOR_HPP
 #define SIB_VECTOR_HPP
 
+#include <cstddef>
+
+#include <boost/type_traits.hpp>
+
+#include "common.hpp"
+
 namespace sib
 {
-  template <typename T, bool IsPod=boost::is_pod<T> >
+  template <typename T, bool IsPod=boost::is_pod<T>::value>
   class vector
   {
   private:
     typedef typename param<T>::type param_type;
   public:
-    typedef Allocator                             allocator_type;
+    typedef T const*                              const_iterator;
+    typedef T const*                              const_pointer;
+    typedef T const&                              const_reference;
+    typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
+    typedef std::ptrdiff_t                        difference_type;
+    typedef T*                                    iterator;
+    typedef T*                                    pointer;
+    typedef T&                                    reference;
+    typedef std::reverse_iterator<iterator>       reverse_iterator;
+    typedef std::size_t                           size_type;
+    typedef T                                     value_type;
+    /*typedef Allocator                             allocator_type;
     typedef typename Allocator::const_pointer     const_iterator;
     typedef typename Allocator::const_pointer     const_pointer;
     typedef typename Allocator::const_reference   const_reference;
@@ -20,10 +37,11 @@ namespace sib
     typedef typename Allocator::reference         reference;
     typedef std::reverse_iterator<iterator>       reverse_iterator;
     typedef typename Allocator::size_type         size_type;
-    typedef typename Allocator::value_type        value_type;
+    typedef typename Allocator::value_type        value_type;*/
 
     // Init/Uninit
     explicit vector(size_type const reserve_capacity=8);
+    vector(vector const& other);
     /*template <typename input_iterator>
     vector(input_iterator first, input_iterator last,
                Allocator const& alloc = Allocator());
@@ -36,7 +54,7 @@ namespace sib
     const_reference back() const                    { return *(_end-1); }
     reference back()                                { return *(_end-1); }
     T const* data() const                           { return _begin; }
-    T* data()                                       { return _data; }
+    T* data()                                       { return _begin; }
     const_reference front() const                   { return *_begin; }
     reference front()                               { return *_begin; }
     const_reference operator[](size_type pos) const { return _begin[pos]; }
@@ -69,7 +87,7 @@ namespace sib
     iterator insert(iterator pos, param_type value);
     void pop_back();
     void push_back(param_type x);
-    void reserve(size_type size);
+    void resize(size_type size);
     void swap(vector& vector);
     vector& operator=(vector const& vector);
 
