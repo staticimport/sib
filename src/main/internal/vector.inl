@@ -57,8 +57,8 @@ namespace sib { namespace internal
 
     static inline void move_right(T* src, T* dest, std::size_t count)
     {
-      T* to = dest + count;
-      for(T* i = src + count; i != src; ++i) {
+      T* to = dest + count - 1;
+      for(T* i = src + count - 1; i >= src; --i) {
 #ifdef SIB_CXX11
         new(to--) T(std::move(*i));
 #else
@@ -159,8 +159,36 @@ sib::vector<T,P>::rbegin()
 }
 
 template <typename T, bool P>
+inline typename sib::vector<T,P>::const_reverse_iterator
+sib::vector<T,P>::rbegin() const
+{
+  return reverse_iterator(_end);
+}
+
+template <typename T, bool P>
+inline typename sib::vector<T,P>::const_reverse_iterator
+sib::vector<T,P>::crbegin() const
+{
+  return reverse_iterator(_end);
+}
+
+template <typename T, bool P>
 inline typename sib::vector<T,P>::reverse_iterator
 sib::vector<T,P>::rend()
+{
+  return reverse_iterator(_begin);
+}
+
+template <typename T, bool P>
+inline typename sib::vector<T,P>::const_reverse_iterator
+sib::vector<T,P>::rend() const
+{
+  return reverse_iterator(_begin);
+}
+
+template <typename T, bool P>
+inline typename sib::vector<T,P>::const_reverse_iterator
+sib::vector<T,P>::crend() const
 {
   return reverse_iterator(_begin);
 }
@@ -169,7 +197,7 @@ template <typename T, bool P>
 inline typename sib::vector<T,P>::size_type
 sib::vector<T,P>::max_size() const
 {
-  return ((sizeof(size_type)) << 8) / sizeof(T);
+  return (static_cast<std::size_t>(1) << ((sizeof(size_type) << 3)-1)) / sizeof(T);
 }
 
 template <typename T, bool P>
@@ -194,16 +222,23 @@ template <typename T, bool P>
 inline typename sib::vector<T,P>::iterator
 sib::vector<T,P>::erase(iterator pos)
 {
-  internal::vector_helper<T,P>::move_left(pos,pos-1,_end-pos);
+  internal::vector_helper<T,P>::move_left(pos+1,pos,_end-pos-1);
   --_end;
-  return pos-1;
+  return pos;
 }
 
 template <typename T, bool P>
 inline typename sib::vector<T,P>::iterator
 sib::vector<T,P>::insert(iterator pos, param_type value)
 {
-  internal::vector_helper<T,P>::move_right(pos,pos+1,_end-pos);
+  if (_end != _capacity_end) 
+    internal::vector_helper<T,P>::move_right(pos,pos+1,_end-pos);
+  else {
+    ptrdiff_t const diff = pos - _begin;
+    reserve(size() << 1);
+    pos = _begin + diff;
+    internal::vector_helper<T,P>::move_right(pos,pos+1,_end-pos);
+  }
   ++_end;
   new(pos) T(value);
   return pos;
@@ -212,7 +247,7 @@ sib::vector<T,P>::insert(iterator pos, param_type value)
 template <typename T, bool P>
 inline void sib::vector<T,P>::pop_back()
 {
-  destruct(--_end);
+  internal::vector_helper<T,P>::destruct(--_end);
 }
 
 template <typename T, bool P>
@@ -236,7 +271,7 @@ inline void sib::vector<T,P>::resize(size_type count)
     for(T* t = _begin + old_size; t != _end; ++t)
       new(t) T();
   } else {
-    size_type const old_end = _end;
+    T* const old_end = _end;
     _end = _begin + count;
     internal::vector_helper<T,P>::destruct(_end, old_end);
   }

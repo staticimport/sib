@@ -68,11 +68,11 @@ namespace sib
     SIB_NOEXCEPT const_iterator end() const     { return _end; }
     SIB_NOEXCEPT const_iterator cend() const    { return _end; }
     SIB_NOEXCEPT reverse_iterator rbegin();
-    //SIB_NOEXCEPT const_reverse_iterator rbegin() const;
-    //SIB_NOEXCEPT const_reverse_iterator crbegin() const;
+    SIB_NOEXCEPT const_reverse_iterator rbegin() const;
+    SIB_NOEXCEPT const_reverse_iterator crbegin() const;
     SIB_NOEXCEPT reverse_iterator rend();
-    //SIB_NOEXCEPT const_reverse_iterator rend() const;
-    //SIB_NOEXCEPT const_reverse_iterator crend() const;
+    SIB_NOEXCEPT const_reverse_iterator rend() const;
+    SIB_NOEXCEPT const_reverse_iterator crend() const;
 
     // capacity
     SIB_NOEXCEPT size_type capacity() const   { return _capacity_end - _begin; }
