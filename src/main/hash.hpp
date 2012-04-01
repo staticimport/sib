@@ -33,7 +33,7 @@ namespace sib
   };
 }
 
-#include "hash.inl"
+#include "internal/hash.inl"
 
 #endif /* SIB_HASH_HPP */
 
