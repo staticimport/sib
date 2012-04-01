@@ -10,6 +10,21 @@ inline sib::vector_table<K,V,E>::vector_table(I begin, I end)
   }
 }
 
+/*template <typename K, typename V, typename E>
+inline typename sib::vector_table<K,V,E>::reference
+sib::vector_table<K,V,E>::operator[](K const& key)
+{
+  iterator iter = find(key);
+  if (iter != end())
+    return *iter;
+  else {
+    _vec.resize(_vec.size()+1);
+    iterator iter = end()-1;
+    iter->
+    return *(end()-1);
+  }
+}*/
+
 template <typename K, typename V, typename E>
 inline std::pair<typename sib::vector_table<K,V,E>::iterator,bool> 
 sib::vector_table<K,V,E>::insert(K const& key, V const& value)
@@ -68,7 +83,7 @@ template <typename K, typename V, typename E>
 sib::vector_table<K,V,E>& 
 sib::vector_table<K,V,E>::operator=(sib::vector_table<K,V,E> const& other)
 {
-  _vec = other.vec;
+  _vec = other._vec;
   return *this;
 }
 

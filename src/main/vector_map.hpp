@@ -31,11 +31,12 @@ namespace sib
     typedef std::size_t                                 size_type;
 
     vector_map() {}
+    ~vector_map() {}
 
     // element access
     T& at(K const& key);
     T const& at(K const& key) const;
-    T& operator[](K const& key)               { return find(key)->second; }
+    T& operator[](K const& key);
 
     // iterators
     iterator begin()                          { return _table.begin(); }

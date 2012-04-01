@@ -20,6 +20,18 @@ inline T const& sib::vector_map<K,T,E>::at(K const& key) const
 }
 
 template <typename K, typename T, typename E>
+inline T& sib::vector_map<K,T,E>::operator[](K const& key)
+{
+  iterator iter = find(key);
+  if (iter != end())
+    return iter->second;
+  else {
+    _table.push_back(std::make_pair(key,T()));
+    return _table.back().second;
+  }
+}
+
+template <typename K, typename T, typename E>
 inline std::pair<typename sib::vector_map<K,T,E>::iterator,bool>
 sib::vector_map<K,T,E>::insert(value_type const& x)
 {

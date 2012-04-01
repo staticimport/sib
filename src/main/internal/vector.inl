@@ -291,7 +291,7 @@ sib::vector<T,P>::operator=(vector const& other)
 {
   if (this != &other) {
     vector copy(other);
-    swap(other);
+    swap(copy);
   }
   return *this;
 }

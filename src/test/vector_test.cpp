@@ -166,6 +166,46 @@ void test_lookup(std::vector<T> const& data)
   EXPECT_THROW(sib_v.at(sib_v.size()), std::runtime_error);
 }
 
+template <typename T>
+void test_swap(std::vector<T> const& data)
+{
+  sib::vector<T> v1;
+  sib::vector<T> v2;
+  for(std::size_t ii = 0; ii != data.size(); ++ii)
+    v1.push_back(data[ii]);
+  v1.swap(v2);
+  EXPECT_TRUE(v1.empty());
+  EXPECT_EQ(data.size(), v2.size());
+  v1.swap(v2);
+  EXPECT_TRUE(v2.empty());
+  EXPECT_EQ(data.size(), v1.size());
+}
+
+template <typename T>
+void test_assignment(std::vector<T> const& data)
+{
+  sib::vector<T> v1;
+  sib::vector<T> v2;
+  for(std::size_t ii = 0; ii != data.size(); ++ii)
+    v1.push_back(data[ii]);
+  v2 = const_cast<sib::vector<T> const&>(v1);
+  EXPECT_EQ(v1.size(), v2.size());
+  for(std::size_t ii = 0; ii != data.size(); ++ii)
+    EXPECT_TRUE(v1.at(ii) == v2.at(ii));
+}
+
+template <typename T>
+void test_copy(std::vector<T> const& data)
+{
+  sib::vector<T> v1;
+  for(std::size_t ii = 0; ii != data.size(); ++ii)
+    v1.push_back(data[ii]);
+  sib::vector<T> v2(const_cast<sib::vector<T> const&>(v1));
+  EXPECT_EQ(v1.size(), v2.size());
+  for(std::size_t ii = 0; ii != data.size(); ++ii)
+    EXPECT_TRUE(v1.at(ii) == v2.at(ii));
+}
+
 TEST(vector, pod_new)
 {
   test_new<int>();
@@ -310,4 +350,33 @@ TEST(vector, class_lookup)
   test_lookup<std::string>(generate_strings(20));
 }
 
+TEST(vector, pod_swap)
+{
+  test_swap<int>(generate_ints(20));
+}
+
+TEST(vector, class_swap)
+{
+  test_swap<std::string>(generate_strings(20));
+}
+
+TEST(vector, pod_assignment)
+{
+  test_assignment<int>(generate_ints(20));
+}
+
+TEST(vector, class_assignment)
+{
+  test_assignment<std::string>(generate_strings(20));
+}
+
+TEST(vector, pod_copy_constructor)
+{
+  test_copy<int>(generate_ints(20));
+}
+
+TEST(vector, class_copy_constructor)
+{
+  test_copy<std::string>(generate_strings(20));
+}
 

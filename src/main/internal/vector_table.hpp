@@ -50,10 +50,13 @@ namespace sib {
     size_type size() const                    { return _vec.size(); }
 
     // element access
-    const_reference at(size_type index) const         { return _vec.at(index); }
+    //const_reference at(size_type index) const         { return _vec.at(index); }
     const_reference back() const                      { return _vec.back(); }
+    reference back()                                  { return _vec.back(); }
     const_reference front() const                     { return _vec.front(); }
-    const_reference operator[](size_type index) const { return _vec[index]; }
+    reference front() const                           { return _vec.front(); }
+    //const_reference operator[](size_type index) const { return _vec[index]; }
+    //reference operator[](K const& key);
 
     // modifiers
     void clear()                              { _vec.clear(); }
@@ -62,8 +65,9 @@ namespace sib {
     void insert(InputIterator begin, InputIterator end);*/
     void erase(const_iterator position);
     size_type erase(K const& key);
+    void push_back(V const& x)                  { _vec.push_back(x); }
     void resize(size_type size)                 { _vec.resize(size); }
-    void swap(vector_table& other)              { _vec.swap(other); }
+    void swap(vector_table& other)              { _vec.swap(other._vec); }
     vector_table& operator=(vector_table const& other);
 
     // lookup
