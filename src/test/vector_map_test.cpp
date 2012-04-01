@@ -9,7 +9,7 @@
 
 #define SZT(x) static_cast<std::size_t>(x)
 
-std::vector<int> generate_ints(std::size_t count)
+static std::vector<int> generate_ints(std::size_t count)
 {
   std::vector<int> v;
   for(std::size_t ii = 0; ii != count; ++ii)
@@ -17,7 +17,7 @@ std::vector<int> generate_ints(std::size_t count)
   return v;
 }
 
-std::vector<std::string> generate_strings(std::size_t count)
+static std::vector<std::string> generate_strings(std::size_t count)
 {
   std::vector<std::string> v;
   for(std::size_t ii = 0; ii != count; ++ii) {
@@ -29,7 +29,7 @@ std::vector<std::string> generate_strings(std::size_t count)
 }
 
 template <typename T>
-void verify_equal(sib::vector_map<T,T> const& sib_map,
+static void verify_equal(sib::vector_map<T,T> const& sib_map,
                   std::map<T,T> const& std_map)
 {
   EXPECT_EQ(std_map.size(), sib_map.size());
@@ -42,7 +42,7 @@ void verify_equal(sib::vector_map<T,T> const& sib_map,
 }
 
 template <typename T>
-void test_insert(std::vector<T> const& data)
+static void test_insert(std::vector<T> const& data)
 {
   sib::vector_map<T,T> map;
   std::map<T,T> std_map;
@@ -61,11 +61,17 @@ void test_insert(std::vector<T> const& data)
     EXPECT_TRUE(data[ii] == r1.first->first);
     EXPECT_TRUE(data[ii] == r2.first->second);
     verify_equal<T>(map, std_map);
+    std::pair<typename sib::vector_map<T,T>::iterator, bool> r3 = map.insert(p);
+    std_map.insert(p);
+    EXPECT_FALSE(r3.second);
+    EXPECT_TRUE(data[ii] == r1.first->first);
+    EXPECT_TRUE(data[ii] == r2.first->second);
+    verify_equal<T>(map, std_map);
   }
 }
 
 template <typename T>
-void test_clear(std::vector<T> const& data)
+static void test_clear(std::vector<T> const& data)
 {
   sib::vector_map<T,T> map;
   for(std::size_t ii = 0; ii != data.size(); ++ii)
@@ -76,7 +82,7 @@ void test_clear(std::vector<T> const& data)
 }
 
 template <typename T>
-void test_swap(std::vector<T> const& data)
+static void test_swap(std::vector<T> const& data)
 {
   sib::vector_map<T,T> map1;
   sib::vector_map<T,T> map2;
@@ -91,7 +97,7 @@ void test_swap(std::vector<T> const& data)
 }
 
 template <typename T>
-void test_assignment(std::vector<T> const& data)
+static void test_assignment(std::vector<T> const& data)
 {
   sib::vector_map<T,T> map1;
   sib::vector_map<T,T> map2;
@@ -106,7 +112,7 @@ void test_assignment(std::vector<T> const& data)
 }
 
 template <typename T>
-void test_copy(std::vector<T> const& data)
+static void test_copy(std::vector<T> const& data)
 {
   sib::vector_map<T,T> map1;
   for(std::size_t ii = 0; ii != data.size(); ++ii)
@@ -120,7 +126,7 @@ void test_copy(std::vector<T> const& data)
 }
 
 template <typename T>
-void test_lookup(std::vector<T> const& data)
+static void test_lookup(std::vector<T> const& data)
 {
   sib::vector_map<T,T> map;
   for(std::size_t ii = 1; ii != data.size(); ++ii)
@@ -130,13 +136,21 @@ void test_lookup(std::vector<T> const& data)
     EXPECT_TRUE(data[ii] == map.at(data[ii]));
     EXPECT_TRUE(data[ii] == const_ref.at(data[ii]));
     EXPECT_TRUE(data[ii] == map[data[ii]]);
+    EXPECT_TRUE(data[ii] == map.find(data[ii])->first);
+    EXPECT_TRUE(data[ii] == map.find(data[ii])->second);
+    EXPECT_TRUE(data[ii] == const_ref.find(data[ii])->first);
+    EXPECT_TRUE(data[ii] == const_ref.find(data[ii])->second);
+    EXPECT_EQ(SZT(1), const_ref.count(data[ii]));
   }
+  EXPECT_EQ(SZT(0), const_ref.count(data[0]));
+  EXPECT_TRUE(map.end() == map.find(data[0]));
+  EXPECT_TRUE(map.cend() == const_ref.find(data[0]));
   EXPECT_THROW(map.at(data[0]), std::runtime_error);
   EXPECT_THROW(const_ref.at(data[0]), std::runtime_error);
 }
 
 template <typename T>
-void test_operator_insert(std::vector<T> const& data)
+static void test_operator_insert(std::vector<T> const& data)
 {
   sib::vector_map<T,T> map;
   map[data[0]] = data[1];

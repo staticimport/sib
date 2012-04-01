@@ -54,7 +54,7 @@ namespace sib {
     const_reference back() const                      { return _vec.back(); }
     reference back()                                  { return _vec.back(); }
     const_reference front() const                     { return _vec.front(); }
-    reference front() const                           { return _vec.front(); }
+    reference front()                                 { return _vec.front(); }
     //const_reference operator[](size_type index) const { return _vec[index]; }
     //reference operator[](K const& key);
 
