@@ -1,3 +1,7 @@
+//          Copyright Craig Bowles 2012
+// Distributed under the Boost Software License, Version 1.0.
+//    (See accompanying file LICENSE_1_0.txt or copy at
+//          http://www.boost.org/LICENSE_1_0.txt)
 
 #include <limits>
 
@@ -100,8 +104,8 @@ template <typename T, typename A>
 inline void sib::xor_list<T,A>::push_back(typename param<T>::type item)
 {
 #ifdef USE_TAIL_SENTINEL
-  node* const n = new(_alloc.allocate(1)) node(item);
   node* const prev = _tail_sentinel->previous(NULL);
+  node* const n = new(_alloc.allocate(1,prev)) node(item);
   n->update_link(prev, _tail_sentinel);
   _tail_sentinel->update_link(n, NULL);
   if (prev)
@@ -110,7 +114,7 @@ inline void sib::xor_list<T,A>::push_back(typename param<T>::type item)
     _head = n;
   ++_size;
 #else
-  node* const n = new(_alloc.allocate(1)) node(item);
+  node* const n = new(_alloc.allocate(1,_tail)) node(item);
   if (SIB_LIKELY(0 != _tail)) {
     n->update_link(_tail, NULL);
     _tail->update_link(_tail->previous(NULL), n);
@@ -128,7 +132,7 @@ inline void sib::xor_list<T,A>::push_back(typename param<T>::type item)
 template <typename T, typename A>
 inline void sib::xor_list<T,A>::push_front(typename param<T>::type item)
 {
-  node* const n = new(_alloc.allocate(1)) node(item);
+  node* const n = new(_alloc.allocate(1,_head)) node(item);
   n->update_link(NULL, _head);
   _head->update_link(n, _head->next(NULL));
   _head = n;

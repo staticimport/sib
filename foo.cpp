@@ -6,7 +6,8 @@
 #include <unordered_map>
 
 #include "bucket_hash_map.hpp"
-#include "probe_hash_map.hpp"
+#include "cuckoo_hash_map.hpp"
+//#include "probe_hash_map.hpp"
 #include "simple_hash_map.hpp"
 #include "vector_hash_map.hpp"
 
@@ -18,11 +19,11 @@ using namespace sib;
 #define USE_SIB
 //#define LOOKUPS
 
-typedef double KEY;
-static const KEY EMPTY_KEY = -1.0;
+//typedef double KEY;
+//static const KEY EMPTY_KEY = -1.0;
 
-//typedef std::size_t KEY;
-//static const KEY EMPTY_KEY = 0xffffffffffffffff;
+typedef std::size_t KEY;
+static const KEY EMPTY_KEY = 0xffffffffffffffff;
 
 static const KEY TARGET = (KEY)COUNT;
 
@@ -32,7 +33,8 @@ int main(void)
   //sib::bucket_hash_map<KEY,std::size_t> map;
   //sib::simple_hash_map<KEY,std::size_t> map;
   //sib::vector_hash_map<KEY,std::size_t> map;
-  sib::probe_hash_map<KEY,std::size_t> map;
+  //sib::probe_hash_map<KEY,std::size_t> map;
+  sib::cuckoo_hash_map<KEY,std::size_t> map;
 #else
   //std::map<KEY,std::size_t> map;
   //std::unordered_map<KEY,std::size_t> map;
@@ -41,13 +43,13 @@ int main(void)
 #endif
   std::size_t total(1);
   
-  for(KEY ii = 0; ii < TARGET; ++ii) {
-    map[ii] = ii;
-  }
+  //for(KEY ii = 0; ii < TARGET; ++ii) {
+  //  map[ii] = ii;
+  //}
 #ifdef USE_SIB
   //std::cout << "avg bucket depth: " << map.avg_bucket_depth() << std::endl;
 #endif
-  map.clear();
+  //map.clear();
 #ifdef USE_SIB
   //std::cout << "avg bucket depth: " << map.avg_bucket_depth() << std::endl;
 #endif

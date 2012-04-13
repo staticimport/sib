@@ -1,3 +1,8 @@
+//          Copyright Craig Bowles 2012
+// Distributed under the Boost Software License, Version 1.0.
+//    (See accompanying file LICENSE_1_0.txt or copy at
+//          http://www.boost.org/LICENSE_1_0.txt)
+
 #ifndef SIB_POOL_ALLOCATOR_HPP
 #define SIB_POOL_ALLOCATOR_HPP
 
@@ -8,6 +13,8 @@
 
 namespace sib
 {
+  class single_size_memory_pool;
+
   template <typename T, 
             unsigned InitSize=8, 
             unsigned GrowMultiplierTenths=20> // 2x default
@@ -27,6 +34,9 @@ namespace sib
     };
 
     pool_allocator();
+    pool_allocator(pool_allocator const& other);
+    template <typename U>
+    pool_allocator(pool_allocator<U,InitSize,GrowMultiplierTenths> const& other);
     ~pool_allocator();
 
     pointer address(reference x) const              { return &x; }
@@ -37,25 +47,13 @@ namespace sib
     
     void construct(pointer p, const_reference val)  { new(p) T(val); }
     void destroy(pointer p)                         { p->~T(); }
-  private:
-    pool_allocator(pool_allocator const& other); // not supported
 
-    struct free_node
-    {
-      free_node() : _next(NULL) { }
-      free_node* _next;
-    };
-
-    struct block
-    {
-      T* _begin;
-      T* _end;
-    };
-
-    sib::vector<block,true> _blocks;
-    double const _grow_multiplier;
+    single_size_memory_pool* _pool;
+    unsigned* _ref_count;
   };
 }
+
+#include "internal/pool_allocator.inl"
 
 #endif /* SIB_POOL_ALLOCATOR_HPP */
 

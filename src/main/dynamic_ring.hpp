@@ -1,3 +1,8 @@
+//          Copyright Craig Bowles 2012
+// Distributed under the Boost Software License, Version 1.0.
+//    (See accompanying file LICENSE_1_0.txt or copy at
+//          http://www.boost.org/LICENSE_1_0.txt)
+
 #ifndef SIB_DYNAMIC_RING_HPP
 #define SIB_DYNAMIC_RING_HPP
 
@@ -40,7 +45,7 @@ namespace sib {
     typedef typename Allocator::size_type size_type;
     typedef typename Allocator::value_type value_type;
 
-    explicit dynamic_ring(size_type const min_capacity,
+    explicit dynamic_ring(size_type const min_capacity = 16,
                           Allocator const& allocator = Allocator());
     ~dynamic_ring();
 
