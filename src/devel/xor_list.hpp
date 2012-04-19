@@ -79,7 +79,8 @@ namespace sib
   };
 }
 
-#include "internal/xor_list.inl"
+//#include "internal/xor_list.inl"
+#include "xor_list.inl"
 
 #endif /* SIB_XOR_LIST_HPP */
 

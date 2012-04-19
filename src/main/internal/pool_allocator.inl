@@ -30,6 +30,7 @@ private:
 
     char* _begin;
     char* _end;
+    char* _next_unused;
     free_node* _free;
   };
 
@@ -75,7 +76,7 @@ sib::single_size_memory_pool::allocate(std::size_t const size,
       iter != _blocks_rend;
       ++iter)
   {
-    if (iter->_free) {
+    if (iter->_free || iter->_next_unused != iter->_end) {
       b = &(*iter);
       if (!hint || b->contains(hint))
         break;
@@ -83,9 +84,15 @@ sib::single_size_memory_pool::allocate(std::size_t const size,
   }
   if (!b)
     b = expand();
-  free_node* const node = b->_free;
-  b->_free = node->_next;
-  return node;
+  if (b->_free) {
+    free_node* const node = b->_free;
+    b->_free = node->_next;
+    return node;
+  } else {
+    void* const node = b->_next_unused;
+    b->_next_unused += _item_size;
+    return node;
+  }
 }
 
 void
@@ -122,15 +129,8 @@ sib::single_size_memory_pool::expand(std::size_t count)
   std::size_t const alloc_size = count * _item_size;
   new_block._begin = static_cast<char*>(malloc(alloc_size));
   new_block._end = new_block._begin + alloc_size;
+  new_block._next_unused = new_block._begin;
   new_block._free = NULL;
-  for(char* entry = new_block._end - _item_size; 
-      entry >= new_block._begin;
-      entry -= _item_size) 
-  {
-    free_node* const node = reinterpret_cast<free_node*>(entry);
-    node->_next = new_block._free;
-    new_block._free = node;
-  }
   return &new_block;
 }
 
