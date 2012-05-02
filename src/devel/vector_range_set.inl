@@ -32,12 +32,8 @@ void sib::vector_range_set<T>::erase(T const x)
         _ranges.push_back(std::make_pair(x+1, old_second));
         return;
       }
-      if (range.first > range.second) {
-        std::pair<T,T>& last = *(_ranges.end()-1);
-        if (&range != &last)
-          range = last;
-        _ranges.pop_back();
-      }
+      if (range.first > range.second)
+        remove(range);
       return;
     }
   }
@@ -64,5 +60,14 @@ void sib::vector_range_set<T>::insert(T begin, T end)
       ++index;
   }
   _ranges.push_back(std::make_pair(begin, end));
+}
+
+template <typename T>
+inline void sib::vector_range_set<T>::remove(std::pair<T,T>& range)
+{
+  std::pair<T,T>& last = *(_ranges.end()-1);
+  if (&range != &last)
+    range = last;
+  _ranges.pop_back();
 }
 

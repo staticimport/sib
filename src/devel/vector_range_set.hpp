@@ -23,13 +23,8 @@ namespace sib
     std::pair<T,T> const& operator[](unsigned index) const { return _ranges[index]; }
     std::size_t size() const { return _ranges.size(); }
   private:
-    void remove(std::pair<T,T>& range)
-    {
-      std::pair<T,T>& last = *(_ranges.end()-1);
-      if (&range != &last)
-        range = last;
-      _ranges.pop_back();
-    }
+    void remove(std::pair<T,T>& range);
+
     std::vector<std::pair<T,T> > _ranges;
   };
 }
