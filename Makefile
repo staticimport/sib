@@ -7,7 +7,8 @@ CXX := $(shell which ccache 2>/dev/null) g++
 MAIN_CXX_SOURCE_ROOT_DIRS = src/main
 MAIN_CXX_HEADER_FILES := $(foreach dir,$(MAIN_CXX_SOURCE_ROOT_DIRS),$(shell find $(dir) -name "*.hpp"))
 MAIN_CXX_ALL_COMPILABLE_FILES := $(foreach dir,$(MAIN_CXX_SOURCE_ROOT_DIRS),$(shell find $(dir) -name "*.cpp"))
-MAIN_CXX_IMPLEMENTATION_FILES := $(wildcard $(MAIN_CXX_HEADER_FILES:.hpp=.cpp))
+#MAIN_CXX_IMPLEMENTATION_FILES := $(wildcard $(MAIN_CXX_HEADER_FILES:.hpp=.cpp))
+MAIN_CXX_IMPLEMENTATION_FILES = $(MAIN_CXX_ALL_COMPILABLE_FILES)
 
 # C++ Test Source Files
 TEST_CXX_SOURCE_ROOT_DIRS = src/test
@@ -26,7 +27,7 @@ MAIN_TARGET_LIBRARY = install/lib/libsib.a
 
 # Main Build Destination
 TEST_ALL_OBJECTS := $(addprefix $(OBJECTS_ROOT_DIR)/,$(subst src/,,$(TEST_CXX_ALL_COMPILABLE_FILES:.cpp=.o)))
-#TEST_IMPLEMENTATION_OBJECTS := $(addprefix $(OBJECTS_ROOT_DIR)/,$(subst src/,,$(TEST_CXX_IMPLEMENTATION_FILES:.cpp=.o)))
+TEST_IMPLEMENTATION_OBJECTS := $(addprefix $(OBJECTS_ROOT_DIR)/,$(subst src/,,$(TEST_CXX_IMPLEMENTATION_FILES:.cpp=.o)))
 #TEST_IMPLEMENTATION_OBJECTS := $(addprefix $(OBJECTS_ROOT_DIR)/,$(subst src/,,$(TEST_CXX_IMPLEMENTATION_FILES:.cpp=.o)))
 TEST_OBJECT_DIRS := $(sort $(dir $(TEST_ALL_OBJECTS)))
 
@@ -45,7 +46,7 @@ MAIN_CXX_FLAGS = $(WARNING_FLAGS) $(OPTIMIZATION_FLAGS) $(DEBUGGING_FLAGS) \
 main_cxx_flags_with_deps = $(MAIN_CXX_FLAGS) -MMD -MF $(1:.o=.d) -MT $1
 
 # Test Compilation Flags
-TEST_INCLUDE_PATH_FLAGS = -I$(GTEST_ROOT)/include -Iinstall/include $(foreach dir,$(TEST_CXX_SOURCE_ROOT_DIRS),-I$(dir))
+TEST_INCLUDE_PATH_FLAGS = -I$(GTEST_ROOT)/include -Isrc/devel -Iinstall/include $(foreach dir,$(TEST_CXX_SOURCE_ROOT_DIRS),-I$(dir))
 TEST_CXX_FLAGS = $(WARNING_FLAGS) $(OPTIMIZATION_FLAGS) $(DEBUGGING_FLAGS) \
                  $(ENVIRONMENT_FLAGS) $(MISCELLANEOUS_FLAGS) \
                  $(TEST_INCLUDE_PATH_FLAGS)
@@ -53,7 +54,7 @@ test_cxx_flags_with_deps = $(TEST_CXX_FLAGS) -MMD -MF $(1:.o=.d) -MT $1
 
 # Test Linking Flags
 TEST_LIBRARY_PATH_FLAGS = -L$(GTEST_ROOT)/lib -Linstall/lib
-TEST_LIBRARY_LINK_FLAGS = -lgtest
+TEST_LIBRARY_LINK_FLAGS = -lgtest -lsib
 
 all: main test_run
 
@@ -79,7 +80,7 @@ $(OBJECTS_ROOT_DIR)/main/%.o: $(GLOBAL_DEPENDENCIES)
 	$(CXX) $(call main_cxx_flags_with_deps,$@) -c src/main/$*.cpp -o $@
 
 $(MAIN_TARGET_LIBRARY): $(MAIN_IMPLEMENTATION_OBJECTS)
-	@#ar rcs $(MAIN_TARGET_LIBRARY) $(MAIN_IMPLEMENTATION_OBJECTS)
+	ar rcs $(MAIN_TARGET_LIBRARY) $(MAIN_IMPLEMENTATION_OBJECTS)
 
 main_install: | main_compile
 	cp src/main/*.hpp install/include

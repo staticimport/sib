@@ -34,7 +34,7 @@ inline void sib::bloom_filter<T,C,H>::insert(T const& x)
 {
   uint32_t const base_hash = static_cast<uint32_t>(_hasher(x));
   for(unsigned i = 0; i != C; ++i) {
-    uint32_t const hash = base_hash + (i*i);
+    uint32_t const hash = base_hash + i*((base_hash << i)+1);
     _data[(hash >> 3) & _byte_mask] |= SIB_BLOOM_MASKS[hash & 7];
   }
 }
@@ -44,7 +44,7 @@ inline bool sib::bloom_filter<T,C,H>::operator[](T const& x) const
 {
   uint32_t const base_hash = static_cast<uint32_t>(_hasher(x));
   for(unsigned i = 0; i != C; ++i) {
-    uint32_t const hash = base_hash + (i*i);
+    uint32_t const hash = base_hash + i*((base_hash << i)+1);
     if (!(_data[(hash >> 3) & _byte_mask] & SIB_BLOOM_MASKS[hash & 7]))
       return false;
   }

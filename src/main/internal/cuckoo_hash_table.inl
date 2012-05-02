@@ -6,16 +6,12 @@
 #include "bits.hpp"
 
 template <typename K, typename V, typename H1, typename H2, typename E, typename A>
-template <typename X>
-sib::cuckoo_hash_table<K,V,H1,H2,E,A>::cuckoo_hash_table(size_type min_capacity)
-
-template <typename K, typename V, typename H1, typename H2, typename E, typename A>
 sib::cuckoo_hash_table<K,V,H1,H2,E,A>::cuckoo_hash_table(size_type min_capacity)
 : _bucket_set1(power2_above<size_type>(min_capacity, true) / 2)
-, _bucket_set2(_bucket_set1._capacity)
+, _bucket_set2(_bucket_set1._end - _bucket_set1._begin)
 , _load_factor(0.7)
 , _size(0)
-, _resize(static_cast<size_type>(_load_factor * (2 * _bucket_set1._capacity)))
+, _resize(static_cast<size_type>(_load_factor * (2 * (_bucket_set1._end - _bucket_set1._begin))))
 , _expand_set1_next(true)
 {
 }
@@ -53,7 +49,8 @@ void sib::cuckoo_hash_table<K,V,H1,H2,E,A>::clear()
 }
 
 template <typename K, typename V, typename H1, typename H2, typename E, typename A>
-V& sib::cuckoo_hash_table<K,V,H1,H2,E,A>::insert(K const& key, V const& value)
+std::pair<typename sib::cuckoo_hash_table<K,V,H1,H2,E,A>::iterator,bool> 
+sib::cuckoo_hash_table<K,V,H1,H2,E,A>::insert(K const& key, V const& value)
 {
   // Check bucket set 1
   uint32_t const hash1 = static_cast<uint32_t>(_bucket_set1._hasher(key));
@@ -63,7 +60,7 @@ V& sib::cuckoo_hash_table<K,V,H1,H2,E,A>::insert(K const& key, V const& value)
     if (e.is_empty())
       return init(e, key, hash1, static_cast<uint32_t>(_bucket_set2._hasher(key)));
     else if (e._hash1 == hash1 && _equal(value, *e._data))
-      return *e._data;
+      return iterator(e._data);
   }
 
   // Check bucket set 2;
@@ -74,17 +71,19 @@ V& sib::cuckoo_hash_table<K,V,H1,H2,E,A>::insert(K const& key, V const& value)
     if (e.is_empty())
       return init(e, key, hash1, hash2);
     else if (e._hash1 == hash1 && e._hash2 == hash2 && _equal(value, *e._data))
-      return *e._data;
+      return iterator(e._data);
   }
 
   if (_expand_set1_next) {
     entry& e = b1->_entries[0];
     move_to_set2(e, &e, 10);
-    return init(e, key, hash1, hash2);
+    init(e, key, hash1, hash2);
+    return iterator(e._data);
   } else {
     entry& e = b2->_entries[0];
     move_to_set1(e, &e, 10);
-    return init(e, key, hash1, hash2);
+    init(e, key, hash1, hash2);
+    return iterator(e._data);
   }
 }
 
@@ -96,7 +95,8 @@ sib::cuckoo_hash_table<K,V,H1,H2,E,A>::count(K const& key) const
 }
 
 template <typename K, typename V, typename H1, typename H2, typename E, typename A>
-V* sib::cuckoo_hash_table<K,V,H1,H2,E,A>::find(K const& key)
+typename sib::cuckoo_hash_table<K,V,H1,H2,E,A>::iterator 
+sib::cuckoo_hash_table<K,V,H1,H2,E,A>::find(K const& key)
 {
   // Check bucket set 1
   uint32_t const hash1 = static_cast<uint32_t>(_bucket_set1._hasher(key));
@@ -104,7 +104,7 @@ V* sib::cuckoo_hash_table<K,V,H1,H2,E,A>::find(K const& key)
   for(unsigned ii = 0; ii != ENTRIES_PER_BUCKET; ++ii) {
     entry& e = b1->_entries[ii];
     if (!e.is_empty() && e._hash1 == hash1 && _equal(key, *e._data))
-      return e.data();
+      return iterator(e._data);
   }
 
   // Check bucket set 2;
@@ -113,14 +113,15 @@ V* sib::cuckoo_hash_table<K,V,H1,H2,E,A>::find(K const& key)
   for(unsigned ii = 0; ii != ENTRIES_PER_BUCKET; ++ii) {
     entry& e = b2->_entries[ii];
     if (!e.is_empty() && e._hash1 == hash1 && e._hash2 && _equal(key, *e._data))
-      return *e._data;
+      return iterator(e._data);
   }
 
-  return NULL;
+  return iterator(NULL);
 }
 
 template <typename K, typename V, typename H1, typename H2, typename E, typename A>
-V const* sib::cuckoo_hash_table<K,V,H1,H2,E,A>::find(K const& key) const
+typename sib::cuckoo_hash_table<K,V,H1,H2,E,A>::const_iterator
+sib::cuckoo_hash_table<K,V,H1,H2,E,A>::find(K const& key) const
 {
   // Check bucket set 1
   uint32_t const hash1 = static_cast<uint32_t>(_bucket_set1._hasher(key));
@@ -128,7 +129,7 @@ V const* sib::cuckoo_hash_table<K,V,H1,H2,E,A>::find(K const& key) const
   for(unsigned ii = 0; ii != ENTRIES_PER_BUCKET; ++ii) {
     entry const& e = b1->_entries[ii];
     if (!e.is_empty() && e._hash1 == hash1 && _equal(key, *e._data))
-      return e.data();
+      return const_iterator(e._data);
   }
 
   // Check bucket set 2;
@@ -137,16 +138,16 @@ V const* sib::cuckoo_hash_table<K,V,H1,H2,E,A>::find(K const& key) const
   for(unsigned ii = 0; ii != ENTRIES_PER_BUCKET; ++ii) {
     entry const& e = b2->_entries[ii];
     if (!e.is_empty() && e._hash1 == hash1 && e._hash2 && _equal(key, *e._data))
-      return *e._data;
+      return const_iterator(e._data);
   }
 
   // Check stash
   for(typename sib::vector<V*>::const_iterator iter = _stash.begin(); iter != _stash.end(); ++iter) {
     if (_equal(key, *iter))
-      return *iter;
+      return const_iterator(*iter);
   }
 
-  return NULL;
+  return const_iterator(NULL);
 }
 
 template <typename K, typename V, typename H1, typename H2, typename E, typename A>

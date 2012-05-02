@@ -23,24 +23,39 @@ namespace sib
   class cuckoo_hash_table
   {
   private:
-    template <typename B>
+    struct entry
+    {
+      entry() : _data(NULL) {}
+
+      inline bool is_empty() const { return NULL == _data; }
+
+      V* _data;
+      uint32_t _hash1;
+      uint32_t _hash2;
+    };
+
+    template <typename D>
     class cuckoo_iterator
     {
     public:
-      cuckoo_iterator(cuckoo_hash_table& table);
+      cuckoo_iterator(D* data) : _data(data) {}
+      D& operator*() { return *_data; }
+      D* operator->() { return _data; }
+      bool operator==(cuckoo_iterator const& o) const { return _data == o._data; }
     private:
-      void back();
+      /*void back();
       void forward();
 
       cuckoo_hash_table& _table;
       bucket* _buckets_begin;
       bucket* _buckets_end;
       bucket* _current_bucket;
-      unsigned _entry_index;
+      unsigned _entry_index;*/
+      D* _data;
     };
   public:
-    typedef cuckoo_iterator<V*> iterator;
-    typedef cuckoo_iterator<V const*> iterator;
+    typedef cuckoo_iterator<V const>  const_iterator;
+    typedef cuckoo_iterator<V>        iterator;
     typedef std::size_t size_type;
 
     // 'structors
@@ -54,28 +69,18 @@ namespace sib
 
     // modifiers
     void clear();
-    V& insert(K const& key, V const& value);
+    std::pair<iterator,bool> insert(K const& key, V const& value);
     //size_type erase(K const& key);
     //void swap(cuckoo_hash_table& other);
 
     // lookup
     size_type count(K const& key) const;
-    V* find(K const& key);
-    V const* find(K const& key) const;
+    iterator find(K const& key);
+    const_iterator find(K const& key) const;
   private:
     static unsigned const ENTRIES_PER_BUCKET = 4;
     static unsigned const SIZE_SHIFT = 6;
 
-    struct entry
-    {
-      entry() : _data(NULL) {}
-
-      inline bool is_empty() const { return NULL == _data; }
-
-      V* _data;
-      uint32_t _hash1;
-      uint32_t _hash2;
-    };
 
     struct bucket
     {
@@ -111,7 +116,7 @@ namespace sib
     bucket_set<Hash1> _bucket_set1;
     bucket_set<Hash2> _bucket_set2;
     sib::vector<V*> _stash;
-    Allocator _alloc;
+    typename Allocator::template rebind<V>::other _alloc;
     Equal _equal;
     double const _load_factor;
     std::size_t _size;
