@@ -31,7 +31,7 @@ namespace sib
   template <typename T>
   struct hash
   {
-    inline std::size_t operator()(T const& x, std::size_t const seed=0)
+    inline std::size_t operator()(T const& x, std::size_t const seed=0) const
     {
       return hash_value<T>(x,seed);
     }

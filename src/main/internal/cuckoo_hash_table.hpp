@@ -34,33 +34,48 @@ namespace sib
       uint32_t _hash2;
     };
 
-    template <typename D>
+    template <typename E, typename D>
     class cuckoo_iterator
     {
     public:
-      cuckoo_iterator(D* data) : _data(data) {}
-      D& operator*() { return *_data; }
-      D* operator->() { return _data; }
-      bool operator==(cuckoo_iterator const& o) const { return _data == o._data; }
+      cuckoo_iterator(E* begin1, E* end1, E* begin2, E* end2);
+      D& operator*()                  { return *(_entry->_data); }
+      D* operator->()                 { return _entry->_data; }
+      cuckoo_iterator operator++()    { next(); return *this; }
+      cuckoo_iterator operator++(int) { cuckoo_iterator copy(*this); next(); return *this; }
+      bool operator==(cuckoo_iterator const& o) const { return _entry == o._entry; }
     private:
-      /*void back();
-      void forward();
-
-      cuckoo_hash_table& _table;
-      bucket* _buckets_begin;
-      bucket* _buckets_end;
-      bucket* _current_bucket;
-      unsigned _entry_index;*/
-      D* _data;
+      void next()
+      {
+        while (_entry->is_empty() && _entry != _end)
+          ++_entry;
+        if (_entry == _end && _end != _end2) {
+          _entry = _begin2;
+          _end = _end2;
+          while (_entry->is_empty() && _entry != _end)
+            ++_entry;
+        }
+      }
+      
+      E* _entry;
+      E* _end;
+      E* const _begin2;
+      E* const _end2;
     };
   public:
-    typedef cuckoo_iterator<V const>  const_iterator;
-    typedef cuckoo_iterator<V>        iterator;
-    typedef std::size_t size_type;
+    typedef cuckoo_iterator<entry const, V const>   const_iterator;
+    typedef cuckoo_iterator<entry, V>               iterator;
+    typedef std::size_t                             size_type;
 
     // 'structors
     explicit cuckoo_hash_table(size_type min_init_capacity = 16);
     ~cuckoo_hash_table();
+
+    // iterators
+    const_iterator cbegin() const;
+    const_iterator cend() const;
+    iterator begin();
+    iterator end();
 
     // capacity
     bool empty() const                                { return 0 == _size; }
@@ -81,6 +96,8 @@ namespace sib
     static unsigned const ENTRIES_PER_BUCKET = 4;
     static unsigned const SIZE_SHIFT = 6;
 
+    std::pair<iterator,bool> init(entry& e, V const& value, uint32_t hash1, uint32_t hash2);
+    void move(entry& dest, entry& src);
 
     struct bucket
     {
@@ -90,7 +107,7 @@ namespace sib
     template <typename Hash>
     struct bucket_set
     {
-      bucket_set(size_type capacity);
+      bucket_set(size_type capacity, bool hash1);
       ~bucket_set() { delete [] _begin; }
 
       void expand(size_type const min_size);
@@ -101,6 +118,7 @@ namespace sib
       bucket* _begin;
       bucket* _end;
       Hash _hasher;
+      bool const _hash1;
     };
 
     void expand(size_type const min_size);
@@ -108,7 +126,9 @@ namespace sib
     template <typename H>
     bucket* lookup(bucket_set<H>& set, uint32_t hash);
     template <typename H>
-    bucket const* lookup(bucket_set<H>& set, uint32_t hash) const;
+    bucket const* lookup(bucket_set<H> const& set, uint32_t hash) const;
+    template <typename B, typename C>
+    static B lookup(B const buckets, uint32_t const hash, size_type const mask);
 
     void move_with_hash1(entry& e, unsigned moves_left);
     void move_with_hash2(entry& e, unsigned moves_left);

@@ -57,10 +57,10 @@ TEST(vector_range_set, insert_and_erase_small)
 
 TEST(vector_range_set, insert_and_erase)
 {
-  int max = 10000;
+  int max = 1000;
   sib::vector_range_set<int> range_set;
   std::set<int> set;
-  for(unsigned ii = 0; ii != 1000; ++ii)
+  for(unsigned ii = 0; ii != 100; ++ii)
   {
     // insert
     int begin = rand() % max;

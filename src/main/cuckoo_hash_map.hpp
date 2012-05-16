@@ -8,6 +8,9 @@
 
 #include <functional>
 
+#include <boost/functional/hash.hpp>
+
+#include "hash.hpp"
 #include "internal/internal_common.hpp"
 #include "internal/cuckoo_hash_table.hpp"
 
@@ -17,7 +20,7 @@ namespace sib
             typename T,
             typename Alloc=std::allocator<T>,
             typename Equal=std::equal_to<K>,
-            typename Hash1=std::hash<K>,
+            typename Hash1=boost::hash<K>,
             typename Hash2=sib::hash<K> >
   class cuckoo_hash_map
   {
@@ -39,6 +42,14 @@ namespace sib
     explicit cuckoo_hash_map(size_type min_init_capacity = 16) : _table(min_init_capacity) {}
     ~cuckoo_hash_map() {}
 
+    // iterator
+    const_iterator begin() const              { return _table.cbegin(); }
+    const_iterator cbegin() const             { return _table.cbegin(); }
+    const_iterator end() const                { return _table.cend(); }
+    const_iterator cend() const               { return _table.cend(); }
+    iterator begin()                          { return _table.begin(); }
+    iterator end()                            { return _table.end(); }
+
     // element access
     T& at(K const& key);
     T const& at(K const& key) const;
@@ -50,7 +61,10 @@ namespace sib
     size_type size() const                    { return _table.size(); }
 
     // modify
-    std::pair<iterator,bool> insert(value_type const& x) { return _table.insert(x.first,x); }
+    void clear()                                          { _table.clear(); }
+    std::pair<iterator,bool> insert(value_type const& x)  { return _table.insert(x.first,x); }
+    void swap(cuckoo_hash_map& other)                     { } //_table.swap(other._table); }
+    cuckoo_hash_map& operator=(cuckoo_hash_map const& map);
 
     // lookup
     size_type count(key_type const& key) const      { return _table.count(key); }

@@ -34,7 +34,7 @@ TEST_OBJECT_DIRS := $(sort $(dir $(TEST_ALL_OBJECTS)))
 # Common Compilation Flags
 DEBUGGING_FLAGS = -ggdb3
 ENVIRONMENT_FLAGS = -pthread -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
-MISCELLANEOUS_FLAGS = -pipe
+MISCELLANEOUS_FLAGS = -pipe 
 OPTIMIZATION_FLAGS = -O3 -fno-strict-aliasing
 WARNING_FLAGS = -Wall -Werror
 
@@ -46,7 +46,7 @@ MAIN_CXX_FLAGS = $(WARNING_FLAGS) $(OPTIMIZATION_FLAGS) $(DEBUGGING_FLAGS) \
 main_cxx_flags_with_deps = $(MAIN_CXX_FLAGS) -MMD -MF $(1:.o=.d) -MT $1
 
 # Test Compilation Flags
-TEST_INCLUDE_PATH_FLAGS = -I$(GTEST_ROOT)/include -Isrc/devel -Iinstall/include $(foreach dir,$(TEST_CXX_SOURCE_ROOT_DIRS),-I$(dir))
+TEST_INCLUDE_PATH_FLAGS = -I$(GTEST_ROOT)/include -Iinstall/include $(foreach dir,$(TEST_CXX_SOURCE_ROOT_DIRS),-I$(dir))
 TEST_CXX_FLAGS = $(WARNING_FLAGS) $(OPTIMIZATION_FLAGS) $(DEBUGGING_FLAGS) \
                  $(ENVIRONMENT_FLAGS) $(MISCELLANEOUS_FLAGS) \
                  $(TEST_INCLUDE_PATH_FLAGS)

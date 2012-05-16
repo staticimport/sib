@@ -29,7 +29,7 @@ namespace sib
   };
 }
 
-#include "vector_range_set.inl"
+#include "internal/vector_range_set.inl"
 
 #endif /* SIB_VECTOR_RANGE_SET_HPP */
 
