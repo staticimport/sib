@@ -117,6 +117,44 @@ namespace sib
     }
     _size = 0;
   }
+  
+  template <typename K, typename V, typename H, typename E, typename A>
+  typename array_hash_table<K,V,H,E,A>::iterator
+  array_hash_table<K,V,H,E,A>::erase(const_iterator pos)
+  {
+    bucket& b = _buckets[hash(pos->first) & _mask];
+    V* const v_last = b._data + (--b._used);
+    V* const v = b._data + (&(*pos) - b._data);
+    v->~V();
+    if (v_last != v) {
+      new(v) V(*v_last);
+      v_last->~V();
+    }
+    --_size;
+    return iterator(&b, _buckets_end, v, v_last);
+  }
+  
+  template <typename K, typename V, typename H, typename E, typename A>
+  typename array_hash_table<K,V,H,E,A>::size_type
+  array_hash_table<K,V,H,E,A>::erase(K const& key)
+  {
+    bucket& b = _buckets[hash(key) & _mask];
+    V* const v_end = b._data + b._used;
+    for(V* v = b._data; v != v_end; ++v) {
+      if (_equator(key, *v)) {
+        v->~V();
+        V* const v_last = v_end - 1;
+        if (v != v_last) {
+          new(v) V(*v_last);
+          v_last->~V();
+        }
+        --b._used;
+        --_size;
+        return 1;
+      }
+    }
+    return 0;
+  }
 
   template <typename K, typename V, typename H, typename E, typename A>
   std::pair<typename array_hash_table<K,V,H,E,A>::iterator,bool> 
@@ -155,7 +193,7 @@ namespace sib
   {
     bucket& b = _buckets[hash(key) & _mask];
     V* const v_end = b._data + b._used;
-    for(V const* v = b._data; v != v_end; ++v) {
+    for(V* v = b._data; v != v_end; ++v) {
       if (_equator(key, *v))
         return *v;
     }
@@ -258,7 +296,6 @@ namespace sib
   template <typename K, typename V, typename H, typename E, typename A>
   void array_hash_table<K,V,H,E,A>::expand()
   {
-    size_type const old_capacity = _capacity;
     bucket* const old_buckets = _buckets;
     bucket* const old_buckets_end = _buckets_end;
     _capacity <<= 1;

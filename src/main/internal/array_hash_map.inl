@@ -16,7 +16,7 @@ namespace sib
   inline std::pair<typename array_hash_map<K,T,H,E>::iterator, bool>
   array_hash_map<K,T,H,E>::insert(value_type const& x)
   {
-    _table.insert(x.first, x);
+    return _table.insert(x.first, x);
   }
 
 }

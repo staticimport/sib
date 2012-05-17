@@ -75,6 +75,9 @@ namespace sib
 
     // modify
     void clear();
+    void erase(iterator pos)        { erase(pos->first); }
+    iterator erase(const_iterator pos);
+    size_type erase(K const& key);
     std::pair<iterator,bool> insert(K const& key, V const& value);
     void swap(array_hash_table& table);
 
