@@ -18,6 +18,14 @@ namespace sib
   {
     return _table.insert(x.first, x);
   }
+  
+  template <typename K, typename T, typename H, typename E>
+  inline array_hash_map<K,T,H,E>&
+  array_hash_map<K,T,H,E>::operator=(array_hash_map const& map)
+  {
+    _table = map._table;
+    return *this;
+  }
 
 }
 

@@ -48,7 +48,7 @@ static void verify_equal(sib::array_hash_map<T,T> const& sib_map,
 template <typename T>
 static void test_insert(std::vector<T> const& data)
 {
-  sib::array_hash_map<T,T> map;
+  sib::array_hash_map<T,T> map(8);
   std::map<T,T> std_map;
   for(std::size_t ii = 1; ii < data.size(); ++ii) {
     std::pair<T,T> p(data[ii],data[ii]);
@@ -62,14 +62,14 @@ static void test_insert(std::vector<T> const& data)
     std::pair<typename sib::array_hash_map<T,T>::iterator, bool> r2 = map.insert(p2);
     std_map.insert(p2);
     EXPECT_FALSE(r2.second);
-    EXPECT_TRUE(data[ii] == r1.first->first);
+    EXPECT_TRUE(data[ii] == r2.first->first);
     EXPECT_TRUE(data[ii] == r2.first->second);
     verify_equal<T>(map, std_map);
     std::pair<typename sib::array_hash_map<T,T>::iterator, bool> r3 = map.insert(p);
     std_map.insert(p);
     EXPECT_FALSE(r3.second);
-    EXPECT_TRUE(data[ii] == r1.first->first);
-    EXPECT_TRUE(data[ii] == r2.first->second);
+    EXPECT_TRUE(data[ii] == r3.first->first);
+    EXPECT_TRUE(data[ii] == r3.first->second);
     verify_equal<T>(map, std_map);
   }
 }
@@ -193,11 +193,11 @@ TEST(array_hash_map, swap)
   test_swap<std::string>(generate_strings(100));
 }
 
-/*TEST(array_hash_map, assignment)
+TEST(array_hash_map, assignment)
 {
   test_assignment<int>(generate_ints(100));
   test_assignment<std::string>(generate_strings(100));
-}*/
+}
 
 /*TEST(array_hash_map, copy_constructor)
 {

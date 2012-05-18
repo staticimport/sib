@@ -35,6 +35,7 @@ namespace sib
       iterator operator++()       { next(); return *this; }
       iterator operator++(int)    { iterator i(*this); next(); return i; }
       bool operator==(iterator const& other) const;
+      bool operator!=(iterator const& other) const;
     private:
       void next();
 
@@ -80,6 +81,7 @@ namespace sib
     size_type erase(K const& key);
     std::pair<iterator,bool> insert(K const& key, V const& value);
     void swap(array_hash_table& table);
+    array_hash_table& operator=(array_hash_table const& table);
 
     // lookup
     V& at(K const& key);

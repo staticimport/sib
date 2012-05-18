@@ -35,7 +35,7 @@ TEST_OBJECT_DIRS := $(sort $(dir $(TEST_ALL_OBJECTS)))
 DEBUGGING_FLAGS = -ggdb3
 ENVIRONMENT_FLAGS = -pthread -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
 MISCELLANEOUS_FLAGS = -pipe 
-OPTIMIZATION_FLAGS = -O3 -fno-strict-aliasing
+OPTIMIZATION_FLAGS = -O0 -fno-strict-aliasing
 WARNING_FLAGS = -Wall -Werror
 
 # Main Compilation Flags

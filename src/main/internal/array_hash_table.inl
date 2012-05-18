@@ -44,6 +44,12 @@ namespace sib
     {
       return _bucket == other._bucket && _data == other._data;
     }
+
+    template <typename B, typename V>
+    inline bool iterator<B,V>::operator!=(iterator const& other) const
+    {
+      return _bucket != other._bucket || _data != other._data;
+    }
     
     template <typename B, typename V>
     void iterator<B,V>::next()
@@ -112,8 +118,8 @@ namespace sib
       V* const v_end = b->_data + b->_used;
       for(V* v = b->_data; v != v_end; ++v) {
         v->~V();
-        b->_used = 0;
       }
+      b->_used = 0;
     }
     _size = 0;
   }
@@ -160,7 +166,7 @@ namespace sib
   std::pair<typename array_hash_table<K,V,H,E,A>::iterator,bool> 
   array_hash_table<K,V,H,E,A>::insert(K const& key, V const& value)
   {
-    if (_size == _resize)
+    if (_size >= _resize)
       expand();
     bucket& b = _buckets[hash(key) & _mask];
     V* const v_end = b._data + b._used;
@@ -186,6 +192,18 @@ namespace sib
     std::swap(_resize, table._resize);
     std::swap(_buckets, table._buckets);
     std::swap(_buckets_end, table._buckets_end);
+  }
+
+  template <typename K, typename V, typename H, typename E, typename A>
+  array_hash_table<K,V,H,E,A>& 
+  array_hash_table<K,V,H,E,A>::operator=(array_hash_table const& table)
+  {
+    if (this != &table) {
+      clear();
+      for(const_iterator iter = table.cbegin(); iter != table.cend(); ++iter)
+        insert(internal_aht::helper<K,V>::get_key(*iter), *iter);
+    }
+    return *this;
   }
   
   template <typename K, typename V, typename H, typename E, typename A>
@@ -254,7 +272,7 @@ namespace sib
   template <typename K, typename V, typename H, typename E, typename A>
   inline V& array_hash_table<K,V,H,E,A>::operator[](K const& key)
   {
-    if (_size == _resize)
+    if (_size >= _resize)
       expand();
     bucket& b = _buckets[hash(key) & _mask];
     V* const v_end = b._data + b._used;
