@@ -11,5 +11,13 @@ namespace sib
   : _table(min_capacity, load_factor)
   {
   }
+
+  template <typename T, typename H, typename E>
+  inline array_hash_set<T,H,E>&
+  array_hash_set<T,H,E>::operator=(array_hash_set const& set)
+  {
+    _table = set._table;
+    return *this;
+  }
 }
 

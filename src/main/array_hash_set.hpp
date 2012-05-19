@@ -30,12 +30,12 @@ namespace sib
     array_hash_set(size_type min_capacity=16, double load_factor=0.7);
     
     // iterators
+    iterator begin()                    { return _table.begin(); }
+    iterator end()                      { return _table.end(); }
     const_iterator begin() const        { return _table.begin(); }
     const_iterator cbegin() const       { return _table.cbegin(); }
     const_iterator end() const          { return _table.end(); }
     const_iterator cend() const         { return _table.cend(); }
-    iterator begin()                    { return _table.begin(); }
-    iterator end()                      { return _table.end(); }
 
     // capacity
     bool empty() const                  { return _table.empty(); }
@@ -48,6 +48,7 @@ namespace sib
     size_type erase(T const& x)                 { return _table.erase(x); }
     std::pair<iterator,bool> insert(T const& x) { return _table.insert(x,x); }
     void swap(array_hash_set& set)              { _table.swap(set._table); }
+    array_hash_set& operator=(array_hash_set const& set);
 
     // lookup
     size_type count(T const& x) const           { return _table.count(x); }
@@ -55,9 +56,10 @@ namespace sib
     iterator find(T const& x)                   { return _table.find(x); }
   private:
     table_type _table;
-};
+  };
+}
 
-#include "internal/array_hash_table.hpp"
+#include "internal/array_hash_set.inl"
 
 #endif /* SIB_ARRAY_HASH_SET_HPP */
 

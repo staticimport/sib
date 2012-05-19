@@ -214,7 +214,6 @@ namespace sib
     if (this != &table) {
       clear();
       for(const_iterator iter = table.cbegin(); iter != table.cend(); ++iter) {
-        std::cout << iter->first << " -> " << iter->second << std::endl;
         insert(internal_aht::helper<K,V>::get_key(*iter), *iter);
       }
     }
