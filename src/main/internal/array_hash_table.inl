@@ -54,18 +54,18 @@ namespace sib
     template <typename B, typename V>
     void iterator<B,V>::next()
     {
-      if (_data != _data_end) {
-        ++_data;
+      ++_data;
+      if (_data < _data_end) {
         return;
       }
-      while (_bucket != _bucket_end) {
-        ++_bucket;
+      while (++_bucket < _bucket_end) {
         if (_bucket->_used) {
           _data = _bucket->_data;
           _data_end = _bucket->_data + _bucket->_used;
           return;
         }
       }
+      _data = _data_end = NULL;
     }
 
     template <typename K, typename V>
@@ -98,6 +98,19 @@ namespace sib
   , _buckets(static_cast<bucket*>(calloc(_capacity, sizeof(bucket))))
   , _buckets_end(_buckets + _capacity)
   {
+  }
+  
+  template <typename K, typename V, typename H, typename E, typename A>
+  array_hash_table<K,V,H,E,A>::array_hash_table(array_hash_table const& table)
+  : _load_factor(table._load_factor)
+  , _capacity(table._capacity)
+  , _mask(table._mask)
+  , _size(0)
+  , _resize(table._resize)
+  , _buckets(static_cast<bucket*>(calloc(_capacity, sizeof(bucket))))
+  , _buckets_end(_buckets + _capacity)
+  {
+    operator=(table);
   }
   
   template <typename K, typename V, typename H, typename E, typename A>
@@ -200,8 +213,10 @@ namespace sib
   {
     if (this != &table) {
       clear();
-      for(const_iterator iter = table.cbegin(); iter != table.cend(); ++iter)
+      for(const_iterator iter = table.cbegin(); iter != table.cend(); ++iter) {
+        std::cout << iter->first << " -> " << iter->second << std::endl;
         insert(internal_aht::helper<K,V>::get_key(*iter), *iter);
+      }
     }
     return *this;
   }

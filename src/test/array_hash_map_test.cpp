@@ -109,10 +109,13 @@ static void test_assignment(std::vector<T> const& data)
     map1.insert(std::pair<T,T>(data[ii],data[ii]));
   map2 = const_cast<sib::array_hash_map<T,T> const&>(map1);
   EXPECT_EQ(map1.size(), map2.size());
-  typename sib::array_hash_map<T,T>::iterator i1 = map1.begin();
-  typename sib::array_hash_map<T,T>::iterator i2 = map2.begin();
-  for(std::size_t ii = 0; ii != data.size(); ++ii)
-    EXPECT_TRUE(*(i1++) == *(i2++));
+  if (map1.size() == map2.size())
+  {
+    typename sib::array_hash_map<T,T>::iterator i1 = map1.begin();
+    typename sib::array_hash_map<T,T>::iterator i2 = map2.begin();
+    for(std::size_t ii = 0; ii != data.size(); ++ii)
+      EXPECT_TRUE(*(i1++) == *(i2++));
+  }
 }
 
 template <typename T>
@@ -199,11 +202,11 @@ TEST(array_hash_map, assignment)
   test_assignment<std::string>(generate_strings(100));
 }
 
-/*TEST(array_hash_map, copy_constructor)
+TEST(array_hash_map, copy_constructor)
 {
   test_copy<int>(generate_ints(100));
   test_copy<std::string>(generate_strings(100));
-}*/
+}
 
 TEST(array_hash_map, lookup)
 {

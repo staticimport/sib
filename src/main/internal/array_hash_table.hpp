@@ -60,6 +60,7 @@ namespace sib
 
     // 'structors
     array_hash_table(size_type min_capacity=16, double load_factor=0.7);
+    array_hash_table(array_hash_table const& table);
     ~array_hash_table();
 
     // iterators
