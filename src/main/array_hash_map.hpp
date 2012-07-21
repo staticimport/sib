@@ -33,36 +33,35 @@ namespace sib
 
     // 'structors
     array_hash_map(size_type min_capacity=16, double load_factor=0.7);
-    //~array_hash_map();
 
     // iterators
-    iterator begin()              { return _table.begin(); }
-    iterator end()                { return _table.end(); }
-    const_iterator begin() const  { return _table.cbegin(); }
-    const_iterator cbegin() const { return _table.cbegin(); }
-    const_iterator end() const    { return _table.cend(); }
-    const_iterator cend() const   { return _table.cend(); }
+    iterator begin()                            { return _table.begin(); }
+    iterator end()                              { return _table.end(); }
+    const_iterator begin() const                { return _table.cbegin(); }
+    const_iterator cbegin() const               { return _table.cbegin(); }
+    const_iterator end() const                  { return _table.cend(); }
+    const_iterator cend() const                 { return _table.cend(); }
 
     // capacity
-    bool empty() const            { return _table.empty(); }
-    size_type size() const        { return _table.size(); }
+    bool empty() const                          { return _table.empty(); }
+    size_type size() const                      { return _table.size(); }
 
     // modify
-    void clear()                        { _table.clear(); }
-    void erase(iterator pos)            { _table.erase(pos); }
-    iterator erase(const_iterator pos)  { return _table.erase(pos); }
-    size_type erase(K const& key)       { return _table.erase(key); }
+    void clear()                                { _table.clear(); }
+    void erase(iterator pos)                    { _table.erase(pos); }
+    iterator erase(const_iterator pos)          { return _table.erase(pos); }
+    size_type erase(K const& key)               { return _table.erase(key); }
     std::pair<iterator,bool> insert(value_type const& x);
-    void swap(array_hash_map& map)  { _table.swap(map._table); }
+    void swap(array_hash_map& map)              { _table.swap(map._table); }
     array_hash_map& operator=(array_hash_map const& map);
 
     // lookup
-    T& at(K const& key)                     { return _table.at(key).second; }
-    T const& at(K const& key) const         { return _table.at(key).second; }
-    size_type count(K const& key) const     { return _table.count(key); }
-    const_iterator find(K const& key) const { return _table.find(key); }
-    iterator find(K const& key)             { return _table.find(key); }
-    T& operator[](K const& key)             { return _table[key].second; }
+    T& at(K const& key)                         { return _table.at(key).second; }
+    T const& at(K const& key) const             { return _table.at(key).second; }
+    size_type count(K const& key) const         { return _table.count(key); }
+    const_iterator find(K const& key) const     { return _table.find(key); }
+    iterator find(K const& key)                 { return _table.find(key); }
+    T& operator[](K const& key)                 { return _table[key].second; }
   private:
     table_type _table;
   };

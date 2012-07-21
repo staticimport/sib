@@ -50,6 +50,8 @@ namespace sib
     
     void construct(pointer p, const_reference val)  { new(p) T(val); }
     void destroy(pointer p)                         { p->~T(); }
+
+    bool operator==(pool_allocator const& other) const;
   //private:
     internal::simple_memory_pool* _pool;
     unsigned* _ref_count;

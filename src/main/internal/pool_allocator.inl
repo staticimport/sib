@@ -93,4 +93,10 @@ namespace sib
     else
       throw std::runtime_error("pool_allocator only supports single allocations");
   }
+
+  template <typename T, unsigned I, unsigned E>
+  inline bool pool_allocator<T,I,E>::operator==(pool_allocator const& other) const
+  {
+    return this == &other;
+  }
 }

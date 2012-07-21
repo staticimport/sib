@@ -7,6 +7,8 @@
 
 #include <cstdlib>
 
+#include <boost/type_traits.hpp>
+
 namespace sib
 {
   namespace internal_aht
@@ -68,10 +70,21 @@ namespace sib
       _data = _data_end = NULL;
     }
 
+    template <typename T>
+    struct is_primitive
+    {
+      static bool const value = boost::is_fundamental<T>::value || 
+                                boost::is_enum<T>::value || 
+                                boost::is_pointer<T>::value;
+    };
+
     template <typename K, typename V>
     struct helper
     {
-      static K const& get_key(V const& v)
+      static bool const byte_copyable = is_primitive<typename V::first_type>::value &&
+                                        is_primitive<typename V::second_type>::value;
+      //static K const& get_key(V const& v)
+      static typename boost::call_traits<K>::param_type get_key(V const& v)
       {
         return v.first;
       }
@@ -80,7 +93,12 @@ namespace sib
     template <typename K>
     struct helper<K,K>
     {
-      static K const& get_key(K const& k)
+      typedef typename boost::call_traits<K>::param_type param_type;
+
+      static bool const byte_copyable = is_primitive<K>::value;
+
+      //static K const& get_key(K const& k)
+      static param_type get_key(param_type k)
       {
         return k;
       }
@@ -155,7 +173,8 @@ namespace sib
   
   template <typename K, typename V, typename H, typename E, typename A>
   typename array_hash_table<K,V,H,E,A>::size_type
-  array_hash_table<K,V,H,E,A>::erase(K const& key)
+  //array_hash_table<K,V,H,E,A>::erase(K const& key)
+  array_hash_table<K,V,H,E,A>::erase(key_param_type key)
   {
     bucket& b = _buckets[hash(key) & _mask];
     V* const v_end = b._data + b._used;
@@ -177,7 +196,8 @@ namespace sib
 
   template <typename K, typename V, typename H, typename E, typename A>
   std::pair<typename array_hash_table<K,V,H,E,A>::iterator,bool> 
-  array_hash_table<K,V,H,E,A>::insert(K const& key, V const& value)
+  //array_hash_table<K,V,H,E,A>::insert(K const& key, V const& value)
+  array_hash_table<K,V,H,E,A>::insert(key_param_type key, value_param_type value)
   {
     if (_size >= _resize)
       expand();
@@ -221,7 +241,8 @@ namespace sib
   }
   
   template <typename K, typename V, typename H, typename E, typename A>
-  inline V& array_hash_table<K,V,H,E,A>::at(K const& key)
+  //inline V& array_hash_table<K,V,H,E,A>::at(K const& key)
+  inline V& array_hash_table<K,V,H,E,A>::at(key_param_type key)
   {
     bucket& b = _buckets[hash(key) & _mask];
     V* const v_end = b._data + b._used;
@@ -233,7 +254,9 @@ namespace sib
   }
   
   template <typename K, typename V, typename H, typename E, typename A>
-  inline V const& array_hash_table<K,V,H,E,A>::at(K const& key) const
+  //inline V const& array_hash_table<K,V,H,E,A>::at(K const& key) const
+  inline typename array_hash_table<K,V,H,E,A>::value_param_type 
+  array_hash_table<K,V,H,E,A>::at(key_param_type key) const
   {
     bucket const& b = _buckets[hash(key) & _mask];
     V const* const v_end = b._data + b._used;
@@ -246,7 +269,8 @@ namespace sib
   
   template <typename K, typename V, typename H, typename E, typename A>
   inline typename array_hash_table<K,V,H,E,A>::size_type
-  array_hash_table<K,V,H,E,A>::count(K const& key) const
+  //array_hash_table<K,V,H,E,A>::count(K const& key) const
+  array_hash_table<K,V,H,E,A>::count(key_param_type key) const
   {
     bucket const& b = _buckets[hash(key) & _mask];
     V const* const v_end = b._data + b._used;
@@ -259,7 +283,8 @@ namespace sib
   
   template <typename K, typename V, typename H, typename E, typename A>
   inline typename array_hash_table<K,V,H,E,A>::const_iterator 
-  array_hash_table<K,V,H,E,A>::find(K const& key) const
+  //array_hash_table<K,V,H,E,A>::find(K const& key) const
+  array_hash_table<K,V,H,E,A>::find(key_param_type key) const
   {
     bucket& b = _buckets[hash(key) & _mask];
     V* const v_end = b._data + b._used;
@@ -272,7 +297,8 @@ namespace sib
   
   template <typename K, typename V, typename H, typename E, typename A>
   inline typename array_hash_table<K,V,H,E,A>::iterator 
-  array_hash_table<K,V,H,E,A>::find(K const& key)
+  //array_hash_table<K,V,H,E,A>::find(K const& key)
+  array_hash_table<K,V,H,E,A>::find(key_param_type key)
   {
     bucket& b = _buckets[hash(key) & _mask];
     V* const v_end = b._data + b._used;
@@ -284,7 +310,8 @@ namespace sib
   }
   
   template <typename K, typename V, typename H, typename E, typename A>
-  inline V& array_hash_table<K,V,H,E,A>::operator[](K const& key)
+  //inline V& array_hash_table<K,V,H,E,A>::operator[](K const& key)
+  inline V& array_hash_table<K,V,H,E,A>::operator[](key_param_type key)
   {
     if (_size >= _resize)
       expand();
@@ -304,7 +331,8 @@ namespace sib
   }
 
   template <typename K, typename V, typename H, typename E, typename A>
-  inline std::size_t array_hash_table<K,V,H,E,A>::hash(K const& key) const
+  //inline std::size_t array_hash_table<K,V,H,E,A>::hash(K const& key) const
+  inline std::size_t array_hash_table<K,V,H,E,A>::hash(key_param_type key) const
   {
     return static_cast<size_type>(_hasher(key));
   }

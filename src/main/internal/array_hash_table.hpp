@@ -9,6 +9,8 @@
 #include <cstddef>
 #include <stdint.h>
 
+#include <boost/call_traits.hpp>
+
 namespace sib
 {
   namespace internal_aht
@@ -18,7 +20,6 @@ namespace sib
     {
       uint32_t _capacity;
       uint32_t _used;
-      //V _data[0];
       V* _data;
     };
 
@@ -52,6 +53,8 @@ namespace sib
   class array_hash_table
   {
   private:
+    typedef typename boost::call_traits<K>::param_type key_param_type;
+    typedef typename boost::call_traits<V>::param_type value_param_type;
     typedef internal_aht::bucket<V> bucket;
   public:
     typedef internal_aht::iterator<bucket const, V const>   const_iterator;
@@ -79,20 +82,29 @@ namespace sib
     void clear();
     void erase(iterator pos)        { erase(pos->first); }
     iterator erase(const_iterator pos);
-    size_type erase(K const& key);
-    std::pair<iterator,bool> insert(K const& key, V const& value);
+    //size_type erase(K const& key);
+    size_type erase(key_param_type key);
+    //std::pair<iterator,bool> insert(K const& key, V const& value);
+    std::pair<iterator,bool> insert(key_param_type key, value_param_type value);
     void swap(array_hash_table& table);
     array_hash_table& operator=(array_hash_table const& table);
 
     // lookup
-    V& at(K const& key);
-    V const& at(K const& key) const;
-    size_type count(K const& key) const;
-    const_iterator find(K const& key) const;
-    iterator find(K const& key);
-    V& operator[](K const& key);
+    //V& at(K const& key);
+    V& at(key_param_type key);
+    //V const& at(K const& key) const;
+    value_param_type at(key_param_type key) const;
+    //size_type count(K const& key) const;
+    size_type count(key_param_type key) const;
+    //const_iterator find(K const& key) const;
+    const_iterator find(key_param_type key) const;
+    //iterator find(K const& key);
+    iterator find(key_param_type key);
+    //V& operator[](K const& key);
+    V& operator[](key_param_type key);
   private:
-    size_type hash(K const& key) const;
+    //size_type hash(K const& key) const;
+    size_type hash(key_param_type key) const;
     void expand(bucket& b);
     void expand();
 
